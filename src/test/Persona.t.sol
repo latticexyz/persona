@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.10;
 
 import {BaseTest, console} from "./base/BaseTest.sol";
 
-contract ContractTest is BaseTest {
+contract PersonaTest is BaseTest {
     function setUp() public {}
 
     function testExample() public {
