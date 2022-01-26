@@ -41,5 +41,5 @@ contract Persona is ERC721 {
 
     function authorizeWithHook(uint256 personaId, address target, address hookContract, bytes4 callbackFunction) public {}
 
-    function deauthorize(uint256 personaId, address target) -> Remove target's authorization to impersonate public {}
+    function deauthorize(uint256 personaId, address target) public {}
 }

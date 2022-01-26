@@ -4,3 +4,6 @@
 [submodule "lib/solmate"]
 	path = lib/solmate
 	url = https://github.com/rari-capital/solmate
+[submodule "base64"]
+	path = base64
+	url = https://github.com/Brechtpd/base64.git
