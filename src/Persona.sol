@@ -4,6 +4,7 @@ pragma solidity ^0.8.10;
 import {ERC721} from "solmate/tokens/ERC721.sol";
 import {LibCustomArt} from "./libraries/LibCustomArt.sol";
 import {Base64} from 'base64/base64.sol';
+import {LibHelpers} from './libraries/LibHelpers.sol';
 
 contract Persona is ERC721 {
 
@@ -56,6 +57,8 @@ contract Persona is ERC721 {
     function artForAddress(address user) public view returns (string memory) {
         bytes[4] memory colors = gradientForAddress(user);
         uint8[32] memory bars = barsForAddress(user);
+        string memory addr = LibHelpers.toAsciiString(user);
+
         string memory encoded = Base64.encode(
             bytes(
                 abi.encodePacked(
@@ -126,7 +129,9 @@ contract Persona is ERC721 {
                     '<text transform="translate(517 53.413)" fill="#fff" xml:space="preserve" style="white-space:pre" font-family="Verily Serif Mono" font-size="24" letter-spacing=".06em"><tspan x="4.495" y="23.304">*</tspan></text>'
                     '<path fill="#000" d="M542 48h26v38h-26z"/>'
                     '<text transform="translate(543 53.413)" fill="#fff" xml:space="preserve" style="white-space:pre" font-family="Verily Serif Mono" font-size="24" letter-spacing=".06em"><tspan x="4.495" y="23.304">*</tspan></text>'
-                    '<text transform="rotate(-90 606.5 13.5)" fill="#fff" xml:space="preserve" style="white-space:pre" font-size="14" letter-spacing="0em"><tspan x="0" y="15.04">0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B</tspan></text>'
+                    '<text transform="rotate(-90 606.5 13.5)" fill="#fff" xml:space="preserve" style="white-space:pre" font-size="14" letter-spacing="0em"><tspan x="0" y="15.04">',
+                    addr,
+                    '</tspan></text>'
                     '<path stroke="url(#N)" d="M499 808.5h114"/>'
                     '<path stroke="url(#O)" d="M498 808.5H6"/>'
                     '<path stroke="url(#P)" d="M1.5 16v770"/>'
