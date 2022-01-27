@@ -61,16 +61,24 @@ contract Persona is ERC721 {
                     '</mask>'
                     '<g mask="url(#b)">'
                         '<g filter="url(#c)">'
-                        '<circle cx="82" cy="405" r="175" fill="#167C33"/>'
+                        '<circle cx="82" cy="405" r="175" fill="',
+                        colors[0],
+                        '"/>'
                         '</g>'
                         '<g filter="url(#d)">'
-                        '<circle cx="161" cy="67" r="175" fill="#B6B147"/>'
+                        '<circle cx="161" cy="67" r="175" fill="',
+                        colors[1],
+                        '"/>'
                         '</g>'
                         '<g filter="url(#e)">'
-                        '<circle cx="445" cy="502" r="175" fill="#6D486D"/>'
+                        '<circle cx="445" cy="502" r="175" fill="',
+                        colors[2],
+                        '"/>'
                         '</g>'
                         '<g filter="url(#f)">'
-                        '<circle cx="530" cy="175" r="175" fill="#84C3F7"/>'
+                        '<circle cx="530" cy="175" r="175" fill="',
+                        colors[3],
+                        '"/>'
                         '</g>'
                     '</g>'
                     '<path d="M36 549.5V43c0-5.523 4.477-10 10-10h527c5.523 0 10 4.477 10 10v568c0 5.523-4.477 10-10 10H450.059c-1.631 0-3.237-.399-4.679-1.162l-111.756-59.176a10.008 10.008 0 0 0-4.68-1.162H46c-5.523 0-10-4.477-10-10Z" stroke="url(#g)" stroke-width="2"/>'
