@@ -1,20 +1,19 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.10;
 
-import {Base64} from 'base64/base64.sol';
+import {Persona} from "../Persona.sol";
 
 library LibCustomArt {
     
-    // Returns the 5 gradient hex colors for the given address.
-    function gradientForAddress(address addr)
+    // Returns the 5 gradient hex colors for the given personaId.
+    function gradientForAddress(uint256 personaId)
         internal
         pure
         returns (bytes[4] memory)
-    {
-    }
+    {}
 
-    /// Returns the heights of the 10 bars in the barcode for the given address.
-    function barsForAddress(address addr) 
+    /// Returns the heights of the 10 bars in the barcode for the given personaId.
+    function barsForAddress(uint256 personaId) 
         internal
         pure
         returns (uint8[32] memory) 
