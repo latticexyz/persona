@@ -17,6 +17,6 @@ library LibCustomArt {
     function barsForAddress(address addr) 
         internal
         pure
-        returns (uint8[10] memory) 
+        returns (uint8[32] memory) 
     {}
 }

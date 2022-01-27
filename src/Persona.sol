@@ -47,10 +47,15 @@ contract Persona is ERC721 {
         return LibCustomArt.gradientForAddress(user);
     }
 
+    function barsForAddress(address user) public pure returns (uint8[32] memory) {
+        return LibCustomArt.barsForAddress(user);
+    }
+
     // Generates the artwork for a given address.
     // Currently the SVG is Zora's Zorb svg as a filler.
     function artForAddress(address user) public view returns (string memory) {
         bytes[4] memory colors = gradientForAddress(user);
+        uint8[32] memory bars = barsForAddress(user);
         string memory encoded = Base64.encode(
             bytes(
                 abi.encodePacked(
