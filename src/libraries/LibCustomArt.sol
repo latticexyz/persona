@@ -9,15 +9,8 @@ library LibCustomArt {
     function gradientForAddress(address addr)
         internal
         pure
-        returns (bytes[5] memory)
+        returns (bytes[4] memory)
     {
-        return [
-            bytes("0x00"),
-            bytes("0x00"),
-            bytes("0x00"),
-            bytes("0x00"),
-            bytes("0x00")
-        ];
     }
 
     /// Returns the heights of the 10 bars in the barcode for the given address.
