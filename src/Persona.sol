@@ -43,8 +43,6 @@ contract Persona is ERC721 {
                                 ART
     //////////////////////////////////////////////////////////////*/
 
-    
-
     function tokenURI(uint256 id)
         public
         view

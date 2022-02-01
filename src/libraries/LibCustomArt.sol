@@ -59,104 +59,40 @@ library LibCustomArt {
                         '</g>'
                     '</g>'
                     '<path d="M36 549.5V43c0-5.523 4.477-10 10-10h527c5.523 0 10 4.477 10 10v568c0 5.523-4.477 10-10 10H450.059c-1.631 0-3.237-.399-4.679-1.162l-111.756-59.176a10.008 10.008 0 0 0-4.68-1.162H46c-5.523 0-10-4.477-10-10Z" stroke="url(#g)" stroke-width="2"/>'
-                    '<text fill="#fff" xml:space="preserve" style="white-space:pre" font-size="48" font-weight="bold" letter-spacing="-.025em"><tspan x="36" y="620.78">PERSONA</tspan></text>'
-                    '<path fill="url(#h)" d="M93 ',
-                    bars[31],
-                    '.88h11.247V808H93z"/>'
-                    '<path fill="url(#i)" d="M106.637 ',
-                    bars[0],
-                    'h11.247v72h-11.247z"/>'
-                    '<path fill="url(#j)" d="M120.274 ',
-                    bars[1],
-                    '.746h11.247V808h-11.247z"/>'
-                    '<path fill="url(#k)" d="M133.911 ',
-                    bars[2],
-                    '.761h11.247V808h-11.247z"/>'
-                    '<path fill="url(#l)" d="M147.549 ',
-                    bars[3],
-                    '.761h11.247V808h-11.247z"/>'
-                    '<path fill="url(#m)" d="M161.186 ',
-                    bars[4],
-                    '.03h11.247V808h-11.247z"/>'
-                    '<path fill="url(#n)" d="M174.823 ',
-                    bars[5],
-                    '.746h11.247V808h-11.247z"/>'
-                    '<path fill="url(#o)" d="M188.46 ',
-                    bars[6],
-                    'h11.247v72H188.46z"/>'
-                    '<path fill="url(#p)" d="M202.097 ',
-                    bars[7],
-                    '.582h11.247V808h-11.247z"/>'
-                    '<path fill="url(#q)" d="M215.734 ',
-                    bars[8],
-                    '.91h11.247V808h-11.247z"/>'
-                    '<path fill="url(#r)" d="M229.372 ',
-                    bars[9],
-                    '.149h11.247V808h-11.247z"/>'
-                    '<path fill="url(#s)" d="M243.009 ',
-                    bars[10],
-                    'h11.247v72h-11.247z"/>'
-                    '<path fill="url(#t)" d="M256.646 ',
-                    bars[11],
-                    '.582h11.247V808h-11.247z"/>'
-                    '<path fill="url(#u)" d="M270.283 ',
-                    bars[12],
-                    '.433h11.247V808h-11.247z"/>'
-                    '<path fill="url(#v)" d="M283.92 ',
-                    bars[13],
-                    '.792h11.247v46.209H283.92z"/>'
-                    '<path fill="url(#w)" d="M297.558 ',
-                    bars[14],
-                    '.731h11.247V808h-11.247z"/>'
-                    '<path fill="url(#x)" d="M311.195 ',
-                    bars[15],
-                    '.91h11.247V808h-11.247z"/>'
-                    '<path fill="url(#y)" d="M324.832 ',
-                    bars[16],
-                    'h11.247v72h-11.247z"/>'
-                    '<path fill="url(#z)" d="M338.469 ',
-                    bars[17],
-                    '.179h11.247V808h-11.247z"/>'
-                    '<path fill="url(#A)" d="M352.107 ',
-                    bars[18],
-                    'h11.247v72h-11.247z"/>'
-                    '<path fill="url(#B)" d="M365.743 ',
-                    bars[19],
-                    '.672h11.247V808h-11.247z"/>'
-                    '<path fill="url(#C)" d="M379.381 ',
-                    bars[20],
-                    '.88h11.247V808h-11.247z"/>'
-                    '<path fill="url(#D)" d="M393.018 ',
-                    bars[21],
-                    '.359h11.247v59.642h-11.247z"/>'
-                    '<path fill="url(#E)" d="M406.655 ',
-                    bars[22],
-                    '.792h11.247v46.209h-11.247z"/>'
-                    '<path fill="url(#F)" d="M420.292 ',
-                    bars[23],
-                    '.359h11.247v59.642h-11.247z"/>'
-                    '<path fill="url(#G)" d="M433.93 ',
-                    bars[24],
-                    '.03h11.247V808H433.93z"/>'
-                    '<path fill="url(#H)" d="M447.567 ',
-                    bars[25],
-                    '.359h11.247v59.642h-11.247z"/>'
-                    '<path fill="url(#I)" d="M461.204 ',
-                    bars[26],
-                    '.792h11.247v46.209h-11.247z"/>'
-                    '<path fill="url(#J)" d="M474.841 ',
-                    bars[27],
-                    '.746h11.247V808h-11.247z"/>'
-                    '<path fill="url(#K)" d="M488.478 ',
-                    bars[28],
-                    '.612h11.247V808h-11.247z"/>'
-                    '<path fill="url(#L)" d="M502.115 ',
-                    bars[29],
-                    '.97h11.247V808h-11.247z"/>'
-                    '<path fill="url(#M)" d="M515.753 ',
-                    bars[30],
-                    'H527v72h-11.247z"/>'
-                    '<path fill="#000" d="M490 48h26v38h-26z"/>'
+                    '<text fill="#fff" xml:space="preserve" style="white-space:pre" font-size="48" font-weight="bold" letter-spacing="-.025em"><tspan x="36" y="620.78">PERSONA</tspan></text>',
+                   '<path fill="url(#h)" d="M93 755.88h11.247V808H93z"/>'
+                   '<path fill="url(#i)" d="M106.637 736h11.247v72h-11.247z"/>'
+                   '<path fill="url(#j)" d="M120.274 746.746h11.247V808h-11.247z"/>'
+                   '<path fill="url(#k)" d="M133.911 739.761h11.247V808h-11.247z"/>'
+                   '<path fill="url(#l)" d="M147.549 775.761h11.247V808h-11.247z"/>'
+                   '<path fill="url(#m)" d="M161.186 758.03h11.247V808h-11.247z"/>'
+                   '<path fill="url(#n)" d="M174.823 746.746h11.247V808h-11.247z"/>'
+                   '<path fill="url(#o)" d="M188.46 736h11.247v72H188.46z"/>'
+                   '<path fill="url(#p)" d="M202.097 751.582h11.247V808h-11.247z"/>'
+                   '<path fill="url(#q)" d="M215.734 741.91h11.247V808h-11.247z"/>'
+                   '<path fill="url(#r)" d="M229.372 738.149h11.247V808h-11.247z"/>'
+                   '<path fill="url(#s)" d="M243.009 736h11.247v72h-11.247z"/>'
+                   '<path fill="url(#t)" d="M256.646 751.582h11.247V808h-11.247z"/>'
+                   '<path fill="url(#u)" d="M270.283 785.433h11.247V808h-11.247z"/>'
+                   '<path fill="url(#v)" d="M283.92 761.792h11.247v46.209H283.92z"/>'
+                   '<path fill="url(#w)" d="M297.558 753.731h11.247V808h-11.247z"/>'
+                   '<path fill="url(#x)" d="M311.195 741.91h11.247V808h-11.247z"/>'
+                   '<path fill="url(#y)" d="M324.832 736h11.247v72h-11.247z"/>'
+                   '<path fill="url(#z)" d="M338.469 760.179h11.247V808h-11.247z"/>'
+                   '<path fill="url(#A)" d="M352.107 736h11.247v72h-11.247z"/>'
+                   '<path fill="url(#B)" d="M365.743 781.672h11.247V808h-11.247z"/>'
+                   '<path fill="url(#C)" d="M379.381 755.88h11.247V808h-11.247z"/>'
+                   '<path fill="url(#D)" d="M393.018 748.359h11.247v59.642h-11.247z"/>'
+                   '<path fill="url(#E)" d="M406.655 761.792h11.247v46.209h-11.247z"/>'
+                   '<path fill="url(#F)" d="M420.292 748.359h11.247v59.642h-11.247z"/>'
+                   '<path fill="url(#G)" d="M433.93 758.03h11.247V808H433.93z"/>'
+                   '<path fill="url(#H)" d="M447.567 748.359h11.247v59.642h-11.247z"/>'
+                   '<path fill="url(#I)" d="M461.204 761.792h11.247v46.209h-11.247z"/>'
+                   '<path fill="url(#J)" d="M474.841 746.746h11.247V808h-11.247z"/>'
+                   '<path fill="url(#K)" d="M488.478 773.612h11.247V808h-11.247z"/>'
+                   '<path fill="url(#L)" d="M502.115 749.97h11.247V808h-11.247z"/>'
+                   '<path fill="url(#M)" d="M515.753 736H527v72h-11.247z"/>'
+                   '<path fill="#000" d="M490 48h26v38h-26z"/>'
                     '<text transform="translate(491 53.413)" fill="#fff" xml:space="preserve" style="white-space:pre" font-family="Verily Serif Mono" font-size="24" letter-spacing=".06em"><tspan x="4.495" y="23.304">*</tspan></text>'
                     '<path fill="#000" d="M516 48h26v38h-26z"/>'
                     '<text transform="translate(517 53.413)" fill="#fff" xml:space="preserve" style="white-space:pre" font-family="Verily Serif Mono" font-size="24" letter-spacing=".06em"><tspan x="4.495" y="23.304">*</tspan></text>'
