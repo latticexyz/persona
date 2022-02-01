@@ -57,14 +57,21 @@ contract Persona is ERC721 {
         return
             string(
                 abi.encodePacked(
-                    '{"name":"',
-                    name,
-                    '", "description":"',
-                    'Sample description for Persona NFT',
-                    '", "image": "',
-                    'data:image/svg+xml;base64,',
-                    image,
-                    '"}'
+                    'data:application/json;base64,',
+                    Base64.encode(
+                        bytes(
+                            abi.encodePacked(
+                                '{"name":"',
+                                name,
+                                '", "description":"',
+                                'Sample description for Persona NFT',
+                                '", "image": "',
+                                'data:image/svg+xml;base64,',
+                                image,
+                                '"}'
+                            )
+                        )
+                    )
                 )
             );
     }
