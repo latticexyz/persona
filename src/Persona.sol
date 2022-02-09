@@ -2,12 +2,13 @@
 pragma solidity ^0.8.10;
 
 import {ERC721} from "solmate/tokens/ERC721.sol";
-import {LibCustomArt} from "./libraries/LibCustomArt.sol";
 import {Base64} from "base64/base64.sol";
+import {LibCustomArt} from "./libraries/LibCustomArt.sol";
 import {LibHelpers} from "./libraries/LibHelpers.sol";
 
 contract Persona is ERC721 {
-    uint256 currentTokenId;
+    address public owner;
+    uint256 public currentTokenId;
 
     enum PersonaPermission {
         DENY,
@@ -32,6 +33,9 @@ contract Persona is ERC721 {
         mapping(address => mapping(address => PersonaAuthorization)) authorizations;
     }
 
+    // address => can mint
+    mapping(address => bool) public isMinter;
+
     // persona ID => persona nonce
     mapping(uint256 => uint256) internal nonce;
 
@@ -43,6 +47,40 @@ contract Persona is ERC721 {
 
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {
         currentTokenId = 1;
+        owner = msg.sender;
+    }
+
+    /*///////////////////////////////////////////////////////////////
+                            ACCESS CONTROL
+    //////////////////////////////////////////////////////////////*/
+
+    modifier onlyPersonaOwner(uint256 personaId) {
+        require(msg.sender == ownerOf[personaId]);
+        _;
+    }
+
+    modifier onlyPersonaAuthorized(uint256 personaId, address consumer) {
+        require(isAuthorized(personaId, msg.sender, consumer, bytes4(0)));
+        _;
+    }
+
+    modifier onlyMinter() {
+        require(isMinter[msg.sender]);
+        _;
+    }
+
+    modifier onlyContractOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+
+    function setMinter(address minter, bool allowMint) public onlyContractOwner {
+        isMinter[minter] = allowMint;
+    }
+
+    function setOwner(address newContractOwner) public onlyContractOwner {
+        require(newContractOwner != address(0), "ZERO_ADDR");
+        owner = newContractOwner;
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -70,10 +108,6 @@ contract Persona is ERC721 {
         return _personaData(personaId).authorizations[user][consumer];
     }
 
-    function _personaData(uint256 personaId) internal view returns (PersonaData storage) {
-        return personaData[personaId][nonce[personaId]];
-    }
-
     function isAuthorized(
         uint256 personaId,
         address user,
@@ -98,12 +132,15 @@ contract Persona is ERC721 {
         return false;
     }
 
+    function _personaData(uint256 personaId) internal view returns (PersonaData storage) {
+        return personaData[personaId][nonce[personaId]];
+    }
+
     /*///////////////////////////////////////////////////////////////
                                 MUTATION
     //////////////////////////////////////////////////////////////*/
 
-    function impersonate(uint256 personaId, address consumer) public {
-        require(isAuthorized(personaId, msg.sender, consumer, bytes4(0)), "NOT_AUTHORIZED");
+    function impersonate(uint256 personaId, address consumer) public onlyPersonaAuthorized(personaId, consumer) {
         activePersona[msg.sender][consumer] = ActivePersona(nonce[personaId], personaId);
     }
 
@@ -117,7 +154,7 @@ contract Persona is ERC721 {
         address user,
         address consumer,
         bytes4[] memory fnSignatures
-    ) public {
+    ) public onlyPersonaOwner(personaId) {
         _personaData(personaId).permissions[user] = fnSignatures.length == 0
             ? PersonaPermission.CONSUMER_SPECIFIC
             : PersonaPermission.FUNCTION_SPECIFIC;
@@ -136,14 +173,13 @@ contract Persona is ERC721 {
         uint256 personaId,
         address user,
         address consumer
-    ) public {
+    ) public onlyPersonaOwner(personaId) {
         _personaData(personaId).permissions[user] = PersonaPermission.DENY;
         delete _personaData(personaId).authorizations[user][consumer];
         delete activePersona[user][consumer];
     }
 
-    function nuke(uint256 personaId) public {
-        require(ownerOf[personaId] == msg.sender, "NOT_PERSONA_OWNER");
+    function nuke(uint256 personaId) public onlyPersonaOwner(personaId) {
         nonce[personaId] += 1;
     }
 
@@ -151,12 +187,13 @@ contract Persona is ERC721 {
                             NFT Functions
     //////////////////////////////////////////////////////////////*/
 
-    function tokenURI(uint256 id) public view override returns (string memory) {
+    function tokenURI(uint256 personaId) public view override returns (string memory) {
         return "";
     }
 
-    function mint() public {
-        _safeMint(msg.sender, currentTokenId);
+    function mint(address recipient) public onlyMinter returns (uint256 id) {
+        _safeMint(recipient, currentTokenId);
+        id = currentTokenId;
         currentTokenId += 1;
     }
 
