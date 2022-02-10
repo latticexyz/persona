@@ -290,7 +290,7 @@ contract PersonaTest is BaseTest {
         vm.stopPrank();
     }
 
-    /// Transfer \\\ 
+    /// Transfer \\\
     function testTransferOwnership() public {
         uint256 id = _mintTo(personaOwner);
 
@@ -298,7 +298,7 @@ contract PersonaTest is BaseTest {
         persona.transferFrom(address(personaOwner), address(alice), id);
         vm.stopPrank();
 
-        assertTrue(persona.getOwner(id) == address(alice));
+        assertTrue(persona.ownerOf(id) == address(alice));
     }
 
     function testTransferRemovesAuthorization() public {

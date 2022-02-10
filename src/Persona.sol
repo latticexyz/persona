@@ -83,10 +83,6 @@ contract Persona is ERC721 {
         owner = newContractOwner;
     }
 
-    function getOwner(uint256 personaId) public view returns (address) {
-        return ownerOf[personaId];
-    }
-
     /*///////////////////////////////////////////////////////////////
                                 VIEW
     //////////////////////////////////////////////////////////////*/
@@ -126,7 +122,7 @@ contract Persona is ERC721 {
             return getAuthorization(personaId, user, consumer).isAuthorized;
         } else if (getPermission(personaId, user) == PersonaPermission.FUNCTION_SPECIFIC) {
             // TODO: Fix this hacky solution
-            if(fnSignature == bytes4(0)) {
+            if (fnSignature == bytes4(0)) {
                 return true;
             }
             bytes4[] memory fns = getAuthorization(personaId, user, consumer).authorizedFns;
