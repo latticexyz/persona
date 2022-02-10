@@ -16,7 +16,7 @@ contract PersonaTest is BaseTest {
         FUNCTION_SPECIFIC
     }
 
-    /// Mock Addresss \\\
+    /// Mock Addresses \\\
     address deployer = address(1);
     address minter = address(2);
     address personaOwner = address(3);
@@ -25,8 +25,8 @@ contract PersonaTest is BaseTest {
 
     function setUp() public {
         vm.startPrank(deployer);
-        consumer = new MockConsumer();
         persona = new Persona("Lattice Persona", "LTX-PERSONA");
+        consumer = new MockConsumer(address(persona));
         vm.stopPrank();
     }
 
@@ -111,20 +111,95 @@ contract PersonaTest is BaseTest {
         uint256 id = _mintTo(personaOwner);
         _authorizeConsumerSpecific(id, alice, address(consumer));
 
+        // Test that alice can now call consumer's foo() function
+        vm.startPrank(alice);
+        persona.impersonate(id, address(consumer));
+        uint256 fooResult = consumer.foo();
+        assertEq(fooResult, id);
+        vm.stopPrank();
+
         assertEq(uint256(persona.getPermission(id, alice)), uint256(PersonaPermission.CONSUMER_SPECIFIC));
-        
     }
 
     function testAuthorizeFunctionSpecific() public {
+        uint256 id = _mintTo(personaOwner);
+        bytes4[] memory fnSignatures = new bytes4[](1);
+        bytes4 selector = consumer.foo.selector;
+        fnSignatures[0] = selector;
+        _authorizeFunctionSpecific(id, alice, address(consumer), fnSignatures);
+
+        // Test that alice can now call consumer's foo() function
+        vm.startPrank(alice);
+        persona.impersonate(id, address(consumer));
+        uint256 fooResult = consumer.foo();
+        assertEq(fooResult, id);
+        vm.stopPrank();
+
+        // Test that persona contract stores permissions correctly
+        assertEq(uint256(persona.getPermission(id, alice)), uint256(PersonaPermission.FUNCTION_SPECIFIC));
+    }
+
+    /// Deauthorization \\\
+    function testDeauthorizeConsumerSpecific() public {
         uint256 id = _mintTo(personaOwner);
         bytes4[] memory fnSignatures = new bytes4[](1);
         fnSignatures[0] = 0x13af4035;
         _authorizeFunctionSpecific(id, alice, address(consumer), fnSignatures);
 
         vm.startPrank(personaOwner);
-        persona.authorize(id, alice, address(consumer), fnSignatures);
+        persona.deauthorize(id, alice, address(consumer));
         vm.stopPrank();
 
-        assertEq(uint256(persona.getPermission(id, alice)), uint256(PersonaPermission.FUNCTION_SPECIFIC));
+        assertEq(uint256(persona.getPermission(id, alice)), uint256(PersonaPermission.DENY));
+        assertEq(persona.getActivePersona(alice, address(consumer)), uint256(0));
+        assertTrue(persona.getAuthorization(id, alice, address(consumer)).isAuthorized == false);
+        assertEq(persona.getAuthorization(id, alice, address(consumer)).authorizedFns.length, uint256(0));
+    }
+
+    function testDeauthorizeFunctionSpecific() public {
+        uint256 id = _mintTo(personaOwner);
+        _authorizeConsumerSpecific(id, alice, address(consumer));
+
+        vm.startPrank(personaOwner);
+        persona.deauthorize(id, alice, address(consumer));
+        vm.stopPrank();
+
+        assertEq(uint256(persona.getPermission(id, alice)), uint256(PersonaPermission.DENY));
+        assertEq(persona.getActivePersona(alice, address(consumer)), uint256(0));
+        assertTrue(persona.getAuthorization(id, alice, address(consumer)).isAuthorized == false);
+    }
+
+
+    /// Impersonation \\\
+    function testImpersonationWithPermissions() public {
+        uint256 id = _mintTo(personaOwner);
+
+        vm.startPrank(personaOwner);
+        persona.impersonate(id, address(consumer));
+        vm.stopPrank();
+
+        assertTrue(persona.getActivePersona(personaOwner, address(consumer)) == id);
+    }
+
+    function testFailImpersonateWithoutPermissions() public {
+        uint256 id = _mintTo(personaOwner);
+        persona.impersonate(id, address(consumer));
+    }
+
+    /// Deimpersonation \\\
+    function testDeimpersonation() public {
+        uint256 id = _mintTo(personaOwner);
+
+        vm.startPrank(personaOwner);
+        persona.impersonate(id, address(consumer));
+        persona.deimpersonate(address(consumer));
+        vm.stopPrank();
+
+        assertTrue(persona.getActivePersona(personaOwner, address(consumer)) == uint256(0));
+    }
+
+    /// Transfer \\\ 
+    function testTransfer() public {
+        
     }
 }

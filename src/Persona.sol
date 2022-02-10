@@ -89,7 +89,7 @@ contract Persona is ERC721 {
 
     function getActivePersona(address user, address consumer) public view returns (uint256 personaId) {
         // if nonce of active person matches current nonce, return persona id
-        // otherwise, then impersonation have expires -> return 0
+        // otherwise, then impersonation has expired -> return 0
         return
             activePersona[user][consumer].nonce == nonce[activePersona[user][consumer].personaId]
                 ? activePersona[user][consumer].personaId
@@ -121,8 +121,11 @@ contract Persona is ERC721 {
         } else if (getPermission(personaId, user) == PersonaPermission.CONSUMER_SPECIFIC) {
             return getAuthorization(personaId, user, consumer).isAuthorized;
         } else if (getPermission(personaId, user) == PersonaPermission.FUNCTION_SPECIFIC) {
+            // TODO: Fix this hacky solution
+            if(fnSignature == bytes4(0)) {
+                return true;
+            }
             bytes4[] memory fns = getAuthorization(personaId, user, consumer).authorizedFns;
-
             for (uint256 i = 0; i < fns.length; i++) {
                 if (fns[i] == fnSignature) {
                     return true;
