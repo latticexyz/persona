@@ -107,7 +107,14 @@ contract PersonaTest is BaseTest {
         vm.stopPrank();
     }
 
-    function testAuthorizeConsumerSpecific() public {
+    function testPersonaAuthorizeConsumerSpecific() public {
+        uint256 id = _mintTo(personaOwner);
+        _authorizeConsumerSpecific(id, alice, address(consumer));
+
+        assertEq(uint256(persona.getPermission(id, alice)), uint256(PersonaPermission.CONSUMER_SPECIFIC));
+    }
+
+    function testMockConsumerAuthorizeConsumerSpecific() public {
         uint256 id = _mintTo(personaOwner);
         _authorizeConsumerSpecific(id, alice, address(consumer));
 
@@ -117,11 +124,20 @@ contract PersonaTest is BaseTest {
         uint256 fooResult = consumer.foo();
         assertEq(fooResult, id);
         vm.stopPrank();
-
-        assertEq(uint256(persona.getPermission(id, alice)), uint256(PersonaPermission.CONSUMER_SPECIFIC));
     }
 
-    function testAuthorizeFunctionSpecific() public {
+    function testPersonaAuthorizeFunctionSpecific() public {
+        uint256 id = _mintTo(personaOwner);
+        bytes4[] memory fnSignatures = new bytes4[](1);
+        bytes4 selector = consumer.foo.selector;
+        fnSignatures[0] = selector;
+        _authorizeFunctionSpecific(id, alice, address(consumer), fnSignatures);
+
+        // Test that persona contract stores permissions correctly
+        assertEq(uint256(persona.getPermission(id, alice)), uint256(PersonaPermission.FUNCTION_SPECIFIC));
+    }
+
+    function testMockConsumerAuthorizeFunctionSpecific() public {
         uint256 id = _mintTo(personaOwner);
         bytes4[] memory fnSignatures = new bytes4[](1);
         bytes4 selector = consumer.foo.selector;
@@ -134,13 +150,10 @@ contract PersonaTest is BaseTest {
         uint256 fooResult = consumer.foo();
         assertEq(fooResult, id);
         vm.stopPrank();
-
-        // Test that persona contract stores permissions correctly
-        assertEq(uint256(persona.getPermission(id, alice)), uint256(PersonaPermission.FUNCTION_SPECIFIC));
     }
 
     /// Deauthorization \\\
-    function testDeauthorizeConsumerSpecific() public {
+    function testPersonaDeauthorizeConsumerSpecific() public {
         uint256 id = _mintTo(personaOwner);
         bytes4[] memory fnSignatures = new bytes4[](1);
         fnSignatures[0] = 0x13af4035;
@@ -156,9 +169,36 @@ contract PersonaTest is BaseTest {
         assertEq(persona.getAuthorization(id, alice, address(consumer)).authorizedFns.length, uint256(0));
     }
 
-    function testDeauthorizeFunctionSpecific() public {
+    function testFailMockConsumerDeauthorizeConsumerSpecific() public {
         uint256 id = _mintTo(personaOwner);
-        _authorizeConsumerSpecific(id, alice, address(consumer));
+        bytes4[] memory fnSignatures = new bytes4[](1);
+        fnSignatures[0] = 0x13af4035;
+        _authorizeFunctionSpecific(id, alice, address(consumer), fnSignatures);
+
+        vm.startPrank(alice);
+        persona.impersonate(id, address(consumer));
+        vm.stopPrank();
+
+        vm.startPrank(personaOwner);
+        persona.deauthorize(id, alice, address(consumer));
+        vm.stopPrank();
+
+        // Test impersonation was removed and alice can no longer call consumer's foo() function
+        vm.startPrank(alice);
+        consumer.foo();
+        vm.stopPrank();
+    }
+
+    function testPersonaDeauthorizeFunctionSpecific() public {
+        uint256 id = _mintTo(personaOwner);
+        bytes4[] memory fnSignatures = new bytes4[](1);
+        bytes4 selector = consumer.foo.selector;
+        fnSignatures[0] = selector;
+        _authorizeFunctionSpecific(id, alice, address(consumer), fnSignatures);
+
+        vm.startPrank(alice);
+        persona.impersonate(id, address(consumer));
+        vm.stopPrank();
 
         vm.startPrank(personaOwner);
         persona.deauthorize(id, alice, address(consumer));
@@ -169,6 +209,26 @@ contract PersonaTest is BaseTest {
         assertTrue(persona.getAuthorization(id, alice, address(consumer)).isAuthorized == false);
     }
 
+    function testFailMockConsumerDeauthorizeFunctionSpecific() public {
+        uint256 id = _mintTo(personaOwner);
+        bytes4[] memory fnSignatures = new bytes4[](1);
+        bytes4 selector = consumer.foo.selector;
+        fnSignatures[0] = selector;
+        _authorizeFunctionSpecific(id, alice, address(consumer), fnSignatures);
+
+        vm.startPrank(alice);
+        persona.impersonate(id, address(consumer));
+        vm.stopPrank();
+
+        vm.startPrank(personaOwner);
+        persona.deauthorize(id, alice, address(consumer));
+        vm.stopPrank();
+
+        // Test impersonation was removed and alice can no longer call consumer's foo() function
+        vm.startPrank(alice);
+        consumer.foo();
+        vm.stopPrank();
+    }
 
     /// Impersonation \\\
     function testImpersonationWithPermissions() public {
