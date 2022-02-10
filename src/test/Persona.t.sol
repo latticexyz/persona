@@ -192,7 +192,7 @@ contract PersonaTest is BaseTest {
     }
 
     /// Deauthorization \\\
-    function testPersonaDeauthorizeConsumerSpecific() public {
+    function testDeauthorizeConsumerSpecific() public {
         uint256 id = _mintTo(personaOwner);
         _authorizeConsumerSpecific(id, alice, address(consumer));
 
@@ -206,7 +206,7 @@ contract PersonaTest is BaseTest {
         assertEq(persona.getAuthorization(id, alice, address(consumer)).authorizedFns.length, uint256(0));
     }
 
-    function testFailMockConsumerDeauthorizeConsumerSpecific() public {
+    function testFailMockConsumerCallDeauthorizeConsumerSpecific() public {
         uint256 id = _mintTo(personaOwner);
         _authorizeConsumerSpecific(id, alice, address(consumer));
 
@@ -224,7 +224,7 @@ contract PersonaTest is BaseTest {
         vm.stopPrank();
     }
 
-    function testPersonaDeauthorizeFunctionSpecific() public {
+    function testDeauthorizeFunctionSpecific() public {
         uint256 id = _mintTo(personaOwner);
         bytes4[] memory fnSignatures = new bytes4[](1);
         bytes4 selector = consumer.foo.selector;
@@ -244,7 +244,7 @@ contract PersonaTest is BaseTest {
         assertTrue(persona.getAuthorization(id, alice, address(consumer)).isAuthorized == false);
     }
 
-    function testFailMockConsumerDeauthorizeFunctionSpecific() public {
+    function testFailMockConsumerCallDeauthorizeFunctionSpecific() public {
         uint256 id = _mintTo(personaOwner);
         bytes4[] memory fnSignatures = new bytes4[](1);
         bytes4 selector = consumer.foo.selector;
@@ -265,8 +265,60 @@ contract PersonaTest is BaseTest {
         vm.stopPrank();
     }
 
+    function testFailConsumerSpecificCallAfterDeimpersonation() public {
+        uint256 id = _mintTo(personaOwner);
+        _authorizeConsumerSpecific(id, alice, address(consumer));
+
+        vm.startPrank(alice);
+        persona.impersonate(id, address(consumer));
+        persona.deimpersonate(address(consumer));
+        consumer.foo();
+        vm.stopPrank();
+    }
+
+    function testFailFunctionSpecificCallAfterDeimpersonation() public {
+        uint256 id = _mintTo(personaOwner);
+        bytes4[] memory fnSignatures = new bytes4[](1);
+        bytes4 selector = consumer.foo.selector;
+        fnSignatures[0] = selector;
+        _authorizeFunctionSpecific(id, alice, address(consumer), fnSignatures);
+
+        vm.startPrank(alice);
+        persona.impersonate(id, address(consumer));
+        persona.deimpersonate(address(consumer));
+        consumer.foo();
+        vm.stopPrank();
+    }
+
     /// Transfer \\\ 
-    function testTransfer() public {
-        
+    function testTransferOwnership() public {
+        uint256 id = _mintTo(personaOwner);
+
+        vm.startPrank(personaOwner);
+        persona.transferFrom(address(personaOwner), address(alice), id);
+        vm.stopPrank();
+
+        assertTrue(persona.getOwner(id) == address(alice));
+    }
+
+    function testTransferRemovesAuthorization() public {
+        uint256 id = _mintTo(personaOwner);
+
+        vm.startPrank(personaOwner);
+        persona.authorize(id, personaOwner, address(consumer), new bytes4[](0));
+        persona.transferFrom(personaOwner, address(alice), id);
+        vm.stopPrank();
+
+        assertTrue(persona.getAuthorization(id, personaOwner, address(consumer)).isAuthorized == false);
+    }
+
+    function testFailTransferRemovesImpersonation() public {
+        uint256 id = _mintTo(personaOwner);
+
+        vm.startPrank(personaOwner);
+        persona.impersonate(id, address(consumer));
+        persona.transferFrom(personaOwner, address(alice), id);
+        persona.deimpersonate(address(consumer));
+        vm.stopPrank();
     }
 }

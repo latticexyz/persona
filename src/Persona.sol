@@ -83,6 +83,10 @@ contract Persona is ERC721 {
         owner = newContractOwner;
     }
 
+    function getOwner(uint256 personaId) public view returns (address) {
+        return ownerOf[personaId];
+    }
+
     /*///////////////////////////////////////////////////////////////
                                 VIEW
     //////////////////////////////////////////////////////////////*/
