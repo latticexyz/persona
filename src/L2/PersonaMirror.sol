@@ -62,11 +62,6 @@ contract PersonaMirror {
         _;
     }
 
-    modifier onlyPersonaAuthorized(uint256 personaId, address consumer) {
-        require(isAuthorized(personaId, msg.sender, consumer, bytes4(0)));
-        _;
-    }
-
     modifier onlyL1Persona() {
         require(
             msg.sender == address(ovmL2CrossDomainMessenger) &&
@@ -171,10 +166,9 @@ contract PersonaMirror {
         nonce[personaId] += 1;
     }
 
-    function bridgeMirror(address recipient) public onlyL1Persona returns (uint256 id) {
-        require(recipient != address(0), "INVALID_RECIPIENT");
-        require(ownerOf[id] == address(0), "ALREADY_MINTED");
-
-        ownerOf[id] = recipient;
+    function bridgeChangeOwner(address recipient, uint256 personaId) public onlyL1Persona {
+        ownerOf[personaId] = recipient;
+        nonce[personaId] += 1;
     }
+
 }
