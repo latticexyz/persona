@@ -1,5 +1,6 @@
 # TODO
 - finish L1 contract
+- setup upgradable renderer stuff
 - deploy script for persona
 - deploy graph to hosted service
 - e2e test L1 and L2 (use cast)
