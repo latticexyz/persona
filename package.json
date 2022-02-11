@@ -6,6 +6,7 @@
     "foundry:build": "forge build",
     "hardhat:node": "yarn hardhat node",
     "deploy": "zx src/deployments/deploy.mjs",
+    "redeploy-l2": "zx src/deployments/redeploy-l2.mjs",
     "mint": "zx src/tasks/mint/mint-tasks.mjs",
     "sanity": "zx src/tasks/sanity/sanity-tasks.mjs",
     "graph:export-abi": "yarn foundry:build && cp out/Persona.sol/Persona.json subgraphs/L1/abis/",

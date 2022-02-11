@@ -9,33 +9,28 @@ import {Persona} from "../L1/Persona.sol";
 import {PersonaMirror} from "../L2/PersonaMirror.sol";
 
 contract PersonaTest is BaseTest {
-    // MockL2Bridge bridge;
-    // MockConsumer consumer;
-    // Persona persona;
-    // PersonaMirror personaMirror;
-    // enum PersonaPermission {
-    //     DENY,
-    //     CONSUMER_SPECIFIC,
-    //     FUNCTION_SPECIFIC
-    // }
-    // /// Mock Addresses \\\
-    // address deployer = address(1);
-    // address minter = address(2);
-    // address personaOwner = address(3);
-    // address alice = address(5);
-    // address bob = address(6);
-    // function setUp() public {
-    //     vm.startPrank(deployer);
-    //     bridge = new MockL2Bridge();
-    //     consumer = new MockConsumer(address(personaMirror));
-    //     persona = new Persona();
-    //     personaMirror = new PersonaMirror(address(persona), address(bridge));
-    //     vm.stopPrank();
-    // }
+    MockL2Bridge bridge;
+    Persona persona;
+    PersonaMirror personaMirror;
+     address deployer = address(1);
+     address minter = address(2);
+     address personaOwner = address(3);
+     address alice = address(5);
+     address bob = address(6);
+    function setUp() public {
+        vm.startPrank(deployer);
+        bridge = new MockL2Bridge();
+        persona = new Persona("L", "L", address(bridge));
+        personaMirror = new PersonaMirror(address(persona), address(bridge));
+        persona.setPersonaMirrorL2(address(personaMirror));
+        vm.stopPrank();
+    }
     // /// Access Control \\\
-    // function testDeployOwner() public {
-    //     assertEq(persona.owner(), deployer);
-    // }
+    function testCrossMint() public {
+        vm.startPrank(deployer);
+        persona.setMinter(deployer, true);
+        persona.mint(alice);
+    }
     // function testSetOwner() public {
     //     vm.startPrank(deployer);
     //     persona.setOwner(alice);

@@ -1,4 +1,4 @@
 # Persona
 Deployment:
-- Gnosis Chain (100): `0xb6cd64188a6ca24dc5bdbf6e25cd0b8346e43b8c`
-- Optimism on Gnosis Chain (300): `0x4a89ad3c78c9414f6b28d3e61320f0a68d18897a` 
+- Gnosis Chain (100): `0x4d9243430a07d8a3ea87f2ac8463f252f7fc8401`
+- Optimism on Gnosis Chain (300): `0xbec5f944749a91ce94d1ac235c8a5ed20f4ee327` 

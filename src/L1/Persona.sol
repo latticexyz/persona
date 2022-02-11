@@ -61,11 +61,11 @@ contract Persona is ERC721 {
         ovmL1CrossDomainMessenger.sendMessage(
             personaMirrorL2,
             abi.encodeWithSignature(
-                "bridgeChangeOwner(address, uint256)",
+                "bridgeChangeOwner(address,uint256)",
                 recipient,
                 id
             ),
-            1000000 // use whatever gas limit you want
+            1000000
         );
     }
 
@@ -77,7 +77,7 @@ contract Persona is ERC721 {
                 "bridgeNuke(uint256)",
                 id
             ),
-            1000000 // use whatever gas limit you want
+            1000000
         );
     }
 
