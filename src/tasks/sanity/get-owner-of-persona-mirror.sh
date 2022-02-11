@@ -1,0 +1,1 @@
+cast call $1 "ownerOf(uint256)" "$2" --rpc-url "https://optimism.gnosischain.com"

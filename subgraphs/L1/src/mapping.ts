@@ -1,6 +1,6 @@
 import { log, BigInt } from '@graphprotocol/graph-ts';
 import { Persona, Transfer as TransferEvent } from '../generated/Persona/Persona';
-import { Token, Owner, Transfer } from '../generated/schema';
+import { Persona as PersonaEntity, Owner, Transfer } from '../generated/schema';
 
 export function handleTransfer(event: TransferEvent): void {
   log.debug('Transfer detected. From: {} | To: {} | TokenID: {}', [
@@ -11,7 +11,7 @@ export function handleTransfer(event: TransferEvent): void {
 
   let previousOwner = Owner.load(event.params.from.toHexString());
   let newOwner = Owner.load(event.params.to.toHexString());
-  let token = Token.load(event.params.id.toHexString());
+  let persona = PersonaEntity.load(event.params.id.toHexString());
   let transferId = event.transaction.hash
     .toHexString()
     .concat(':'.concat(event.transactionLogIndex.toHexString()));
@@ -37,19 +37,19 @@ export function handleTransfer(event: TransferEvent): void {
     newOwner.balance = prevBalance.minus(BigInt.fromI32(1));
   }
 
-  if (token == null) {
-    token = new Token(event.params.id.toHexString());
+  if (persona == null) {
+    persona = new PersonaEntity(event.params.id.toHexString());
     let uri = instance.try_tokenURI(event.params.id);
     if (!uri.reverted) {
-      token.uri = uri.value;
+      persona.uri = uri.value;
     }
   }
 
-  token.owner = event.params.to.toHexString();
+  persona.owner = event.params.to.toHexString();
 
   if (transfer == null) {
     transfer = new Transfer(transferId);
-    transfer.token = event.params.id.toHexString();
+    transfer.persona = event.params.id.toHexString();
     transfer.from = event.params.from.toHexString();
     transfer.to = event.params.to.toHexString();
     transfer.timestamp = event.block.timestamp;
@@ -59,6 +59,6 @@ export function handleTransfer(event: TransferEvent): void {
 
   previousOwner.save();
   newOwner.save();
-  token.save();
+  persona.save();
   transfer.save();
 }

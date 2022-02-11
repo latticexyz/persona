@@ -155,6 +155,7 @@ contract PersonaMirror {
     ) public onlyPersonaOwner(personaId) {
         _personaData(personaId).permissions[user] = PersonaPermission.DENY;
         delete _personaData(personaId).authorizations[user][consumer];
+        // TODO: @smsunarto this can be used to force de-impersonate people
         delete activePersona[user][consumer];
     }
 

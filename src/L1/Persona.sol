@@ -16,6 +16,7 @@ contract Persona is ERC721 {
 
     address public owner;
     address personaMirrorL2;
+    uint256 currentPersonaId;
 
     // address => can mint
     mapping(address => bool) public isMinter;
@@ -36,6 +37,7 @@ contract Persona is ERC721 {
     }
 
     constructor(string memory name, string memory symbol, address ovmL1CrossDomainMessengerAddr) ERC721(name, symbol) {
+        owner = msg.sender;
         ovmL1CrossDomainMessenger = L1CrossDomainMessenger(ovmL1CrossDomainMessengerAddr);
     }
 
@@ -63,7 +65,7 @@ contract Persona is ERC721 {
                 recipient,
                 id
             ),
-            60000 // use whatever gas limit you want
+            1000000 // use whatever gas limit you want
         );
     }
 
@@ -75,13 +77,14 @@ contract Persona is ERC721 {
                 "bridgeNuke(uint256)",
                 id
             ),
-            40000 // use whatever gas limit you want
+            1000000 // use whatever gas limit you want
         );
     }
 
-    function mint(address to, uint256 personaId) public onlyMinter {
-        _mint(to, personaId);
-        _sendChangeOwner(to, personaId);
+    function mint(address to) public onlyMinter {
+        _mint(to, currentPersonaId);
+        _sendChangeOwner(to, currentPersonaId);
+        currentPersonaId++;
     }
 
     function transferFrom(

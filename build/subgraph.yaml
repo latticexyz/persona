@@ -2,7 +2,7 @@ specVersion: 0.0.2
 description: Person
 repository: https://github.com/latticexyz/persona
 schema:
-  file: ./schema.graphql
+  file: schema.graphql
 dataSources:
   - kind: ethereum
     name: Persona
@@ -21,8 +21,8 @@ dataSources:
         - Transfer
       abis:
         - name: Persona
-          file: ./abis/Persona.json
+          file: Persona/abis/Persona.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
-      file: ./src/mapping.ts
+      file: Persona/Persona.wasm
