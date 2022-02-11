@@ -3,10 +3,10 @@ pragma solidity ^0.8.10;
 
 import {ERC721} from "solmate/tokens/ERC721.sol";
 import {Base64} from "base64/base64.sol";
-import {LibCustomArt} from "./libraries/LibCustomArt.sol";
-import {LibHelpers} from "./libraries/LibHelpers.sol";
+import {LibCustomArt} from "../libraries/LibCustomArt.sol";
+import {LibHelpers} from "../libraries/LibHelpers.sol";
 
-contract Persona is ERC721 {
+contract PersonaMirror is ERC721 {
     address public owner;
     uint256 public currentTokenId;
 
