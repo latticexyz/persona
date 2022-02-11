@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.10;
 
-import {ERC721} from "solmate/tokens/ERC721.sol";
 import {Base64} from "base64/base64.sol";
 import {LibCustomArt} from "../libraries/LibCustomArt.sol";
 import {LibHelpers} from "../libraries/LibHelpers.sol";
 
-contract PersonaMirror is ERC721 {
-    address public owner;
-    uint256 public currentTokenId;
+interface L2CrossDomainMessenger {
+    function xDomainMessageSender() external view returns (address);
+}
+
+contract PersonaMirror {
+    address immutable personaL1;
+    L2CrossDomainMessenger immutable ovmL2CrossDomainMessenger;
 
     enum PersonaPermission {
         DENY,
@@ -33,21 +36,21 @@ contract PersonaMirror is ERC721 {
         mapping(address => mapping(address => PersonaAuthorization)) authorizations;
     }
 
-    // address => can mint
-    mapping(address => bool) public isMinter;
-
     // persona ID => persona nonce
     mapping(uint256 => uint256) internal nonce;
 
     // persona ID => persona nonce => persona data
     mapping(uint256 => mapping(uint256 => PersonaData)) internal personaData;
 
+    // persona id => owner
+    mapping(uint256 => address) public ownerOf;
+
     // user address => consumer contract => active persona
     mapping(address => mapping(address => ActivePersona)) public activePersona;
 
-    constructor(string memory name, string memory symbol) ERC721(name, symbol) {
-        currentTokenId = 1;
-        owner = msg.sender;
+    constructor(address personaL1ContractAddr, address ovmL2CrossDomainMessengerAddr) {
+        personaL1 = personaL1ContractAddr;
+        ovmL2CrossDomainMessenger = L2CrossDomainMessenger(ovmL2CrossDomainMessengerAddr);
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -64,23 +67,12 @@ contract PersonaMirror is ERC721 {
         _;
     }
 
-    modifier onlyMinter() {
-        require(isMinter[msg.sender]);
+    modifier onlyL1Persona() {
+        require(
+            msg.sender == address(ovmL2CrossDomainMessenger) &&
+                ovmL2CrossDomainMessenger.xDomainMessageSender() == personaL1
+        );
         _;
-    }
-
-    modifier onlyContractOwner() {
-        require(msg.sender == owner);
-        _;
-    }
-
-    function setMinter(address minter, bool allowMint) public onlyContractOwner {
-        isMinter[minter] = allowMint;
-    }
-
-    function setOwner(address newContractOwner) public onlyContractOwner {
-        require(newContractOwner != address(0), "ZERO_ADDR");
-        owner = newContractOwner;
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -121,10 +113,6 @@ contract PersonaMirror is ERC721 {
         } else if (getPermission(personaId, user) == PersonaPermission.CONSUMER_SPECIFIC) {
             return getAuthorization(personaId, user, consumer).isAuthorized;
         } else if (getPermission(personaId, user) == PersonaPermission.FUNCTION_SPECIFIC) {
-            // TODO: Fix this hacky solution
-            if (fnSignature == bytes4(0)) {
-                return true;
-            }
             bytes4[] memory fns = getAuthorization(personaId, user, consumer).authorizedFns;
             for (uint256 i = 0; i < fns.length; i++) {
                 if (fns[i] == fnSignature) {
@@ -143,7 +131,8 @@ contract PersonaMirror is ERC721 {
                                 MUTATION
     //////////////////////////////////////////////////////////////*/
 
-    function impersonate(uint256 personaId, address consumer) public onlyPersonaAuthorized(personaId, consumer) {
+    function impersonate(uint256 personaId, address consumer) public {
+        require(getPermission(personaId, msg.sender) != PersonaPermission.DENY);
         activePersona[msg.sender][consumer] = ActivePersona(nonce[personaId], personaId);
     }
 
@@ -164,14 +153,6 @@ contract PersonaMirror is ERC721 {
         _personaData(personaId).authorizations[user][consumer] = PersonaAuthorization(true, fnSignatures);
     }
 
-    // // TODO
-    // function authorizeWithHook(
-    //     uint256 personaId,
-    //     address user,
-    //     address hookContract,
-    //     bytes4 callbackFunction
-    // ) public {}
-
     function deauthorize(
         uint256 personaId,
         address user,
@@ -182,30 +163,18 @@ contract PersonaMirror is ERC721 {
         delete activePersona[user][consumer];
     }
 
-    function nuke(uint256 personaId) public onlyPersonaOwner(personaId) {
-        nonce[personaId] += 1;
-    }
-
     /*///////////////////////////////////////////////////////////////
                             NFT Functions
     //////////////////////////////////////////////////////////////*/
 
-    function tokenURI(uint256 personaId) public view override returns (string memory) {
-        return "";
+    function bridgeNuke(uint256 personaId) public onlyL1Persona {
+        nonce[personaId] += 1;
     }
 
-    function mint(address recipient) public onlyMinter returns (uint256 id) {
-        _safeMint(recipient, currentTokenId);
-        id = currentTokenId;
-        currentTokenId += 1;
-    }
+    function bridgeMirror(address recipient) public onlyL1Persona returns (uint256 id) {
+        require(recipient != address(0), "INVALID_RECIPIENT");
+        require(ownerOf[id] == address(0), "ALREADY_MINTED");
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) public override {
-        super.transferFrom(from, to, id);
-        nonce[id] = nonce[id] + 1;
+        ownerOf[id] = recipient;
     }
 }

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.10;
 
-import {Persona} from "../../Persona.sol";
+import {PersonaMirror} from "../../L2/PersonaMirror.sol";
 import {console} from "../utils/console.sol";
 
 contract MockConsumer {
-    Persona persona; 
+    PersonaMirror persona;
 
     constructor(address personaAddress) {
-        persona = Persona(personaAddress);
+        persona = PersonaMirror(personaAddress);
     }
 
     modifier onlyAuthorized() {
@@ -17,7 +17,7 @@ contract MockConsumer {
         _;
     }
 
-    function foo() public onlyAuthorized() view returns (uint256) {
+    function foo() public view onlyAuthorized returns (uint256) {
         uint256 personaId = persona.getActivePersona(msg.sender, address(this));
         return personaId;
     }
