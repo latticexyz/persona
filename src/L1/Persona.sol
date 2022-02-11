@@ -11,29 +11,32 @@ interface L1CrossDomainMessenger {
     ) external;
 }
 
-
 contract Persona is ERC721 {
+    L1CrossDomainMessenger immutable ovmL1CrossDomainMessenger;
+
+    address public owner;
+    address personaMirrorL2;
 
     // address => can mint
     mapping(address => bool) public isMinter;
 
-    address public owner;
-
-    L1CrossDomainMessenger immutable ovmL1CrossDomainMessenger;
-    address personaMirrorL2;
-
-    constructor(string memory name, string memory symbol, address ovmL1CrossDomainMessengerAddr) ERC721(name, symbol) {
-        ovmL1CrossDomainMessenger = L1CrossDomainMessenger(ovmL1CrossDomainMessengerAddr);
-    }
-
     modifier onlyMinter() {
-        require(isMinter[msg.sender]);
+        require(isMinter[msg.sender], "ONLY_MINTER");
         _;
     }
 
     modifier onlyContractOwner() {
-        require(msg.sender == owner);
+        require(msg.sender == owner, "ONLY_OWNER");
         _;
+    }
+
+    modifier onlyPersonaOwner(uint256 personaId) {
+        require(msg.sender == ownerOf[personaId], "ONLY_PERSONA_OWNER");
+        _;
+    }
+
+    constructor(string memory name, string memory symbol, address ovmL1CrossDomainMessengerAddr) ERC721(name, symbol) {
+        ovmL1CrossDomainMessenger = L1CrossDomainMessenger(ovmL1CrossDomainMessengerAddr);
     }
 
     function setMinter(address minter, bool allowMint) public onlyContractOwner {
@@ -50,10 +53,6 @@ contract Persona is ERC721 {
         personaMirrorL2 = personaMirrorAddr;
     } 
 
-    modifier onlyPersonaOwner(uint256 personaId) {
-        require(msg.sender == ownerOf[personaId]);
-        _;
-    }
 
     function _sendChangeOwner(address recipient, uint256 id) internal {
         require(personaMirrorL2 != address(0), "ZERO_ADDR");
