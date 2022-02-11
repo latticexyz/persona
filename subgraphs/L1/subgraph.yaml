@@ -1,0 +1,27 @@
+specVersion: 0.0.2
+description: Person
+repository: https://github.com/latticexyz/persona
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Persona
+    network: xdai
+    source:
+      address: "0xfd1bd5f2912c00b77ca29f4a08d335c4439c3e29"
+      abi: Persona
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Token
+        - Owner
+        - Transfer
+      abis:
+        - name: Persona
+          file: ./abis/Persona.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/mapping.ts

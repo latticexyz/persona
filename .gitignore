@@ -1,2 +1,5 @@
 cache/
 out/
+node_modules
+subgraphs/**/generated/
+subgraph-build/

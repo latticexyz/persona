@@ -1,0 +1,33 @@
+{
+  "name": "@latticexyz/persona",
+  "version": "0.0.1",
+  "description": "Persona",
+  "scripts": {
+    "foundry:build": "forge build",
+    "hardhat:node": "yarn hardhat node",
+    "graph:export-abi": "yarn foundry:build && cp out/Persona.sol/Persona.json subgraphs/L1/abis/",
+    "graph:codegen": "graph codegen subgraphs/L1/subgraph.yaml -o subgraphs/L1/generated",
+    "graph:build:subgraph": "graph build subgraphs/L1/subgraph.yaml -o subgraph-build/L1",
+    "graph:build": "yarn graph:export-abi && yarn graph:codegen && yarn graph:build:subgraph",
+    "graph:l1:deploy": "graph deploy --node https://api.thegraph.com/deploy/ latticexyz/persona-l1 subgraphs/L1/subgraph.yaml",
+    "// local deployment and testing": "",
+    "graph:l1:create-local": "graph create --node http://localhost:8020/ latticexyz/persona-l1 subgraphs/L1/subgraph.yaml",
+    "graph:l1:remove-local": "graph remove --node http://localhost:8020/ latticexyz/persona-l1 subgraphs/L1/subgraph.yaml",
+    "graph:l1:deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 latticexyz/persona-l1 subgraphs/L1/subgraph.yaml"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/latticexyz/persona.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/latticexyz/persona/issues"
+  },
+  "homepage": "https://github.com/latticexyz/persona#readme",
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.26.0",
+    "@graphprotocol/graph-ts": "^0.24.1",
+    "@types/node": "^12.0.0"
+  }
+}
