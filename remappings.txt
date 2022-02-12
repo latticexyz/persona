@@ -1,4 +1,5 @@
 solmate/=lib/solmate/src/
 weird-erc20/=lib/solmate/lib/weird-erc20/src/
 ds-test/=lib/ds-test/src/
-base64/=lib/base64
+base64/=lib/base64/
+gsn/=lib/gsn/packages/contracts/src/

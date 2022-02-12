@@ -1,0 +1,24 @@
+type Persona @entity {
+  id: ID!
+  owner: Owner
+  uri: String
+  transfers: [Transfer!]! @derivedFrom(field: "persona")
+}
+
+type Owner @entity {
+  id: ID!
+  ownedPersonas: [Persona!]! @derivedFrom(field: "owner")
+  balance: BigInt!
+}
+
+type Transfer @entity {
+  id: ID!
+  persona: Persona!
+  # Empty from is minting
+  from: Owner
+  # Empty to is burning
+  to: Owner
+  timestamp: BigInt!
+  block: BigInt!
+  transactionHash: String!
+}

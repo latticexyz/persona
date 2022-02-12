@@ -1,0 +1,1 @@
+cast send $1 "setPersonaMirrorL2(address)" "$2" --rpc-url "https://rpc.xdaichain.com" --private-key $3

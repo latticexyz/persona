@@ -1,0 +1,1 @@
+cast send $1 "mint(address)" "$2" --interactive --rpc-url "https://rpc.xdaichain.com" --private-key $3 --gas 300000
