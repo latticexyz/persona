@@ -2,13 +2,22 @@
   "name": "@latticexyz/persona",
   "version": "0.0.1",
   "description": "Persona",
+  "files": [
+    "src/L1",
+    "src/L2",
+    "src/libraries",
+    "deployment.json",
+    "LICENSE"
+  ],
   "scripts": {
-    "foundry:build": "forge build",
-    "hardhat:node": "yarn hardhat node",
+    "release": "release-it",
+    "// deployment and tasks": "",
     "deploy": "zx src/deployments/deploy.mjs",
     "redeploy-l2": "zx src/deployments/redeploy-l2.mjs",
     "mint": "zx src/tasks/mint/mint-tasks.mjs",
     "sanity": "zx src/tasks/sanity/sanity-tasks.mjs",
+    "// subgraphs": "",
+    "foundry:build": "forge build --force",
     "graph:export-abi": "yarn foundry:build && cp out/Persona.sol/Persona.json subgraphs/L1/abis/",
     "graph:codegen": "graph codegen subgraphs/L1/subgraph.yaml -o subgraphs/L1/generated",
     "graph:build:subgraph": "graph build subgraphs/L1/subgraph.yaml -o subgraph-build/L1",
@@ -32,6 +41,8 @@
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.26.0",
     "@graphprotocol/graph-ts": "^0.24.1",
-    "@types/node": "^12.0.0"
+    "@types/node": "^12.0.0",
+    "release-it": "^14.12.4",
+    "zx": "^5.0.0"
   }
 }
