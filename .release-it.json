@@ -1,0 +1,6 @@
+{
+  "npm": {
+    "skipChecks": true,
+    "publishArgs": "--registry=https://registry.npmjs.org"
+  }
+}
