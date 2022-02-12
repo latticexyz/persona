@@ -55,7 +55,7 @@ contract Persona is ERC721, BaseRelayRecipient {
     }
 
     modifier onlyContractOwner() {
-        require(_msgSender() == personaOwner, "ONLY_OWNER");
+        require(_msgSender() == personaOwner, "ONLY_CONTRACT_OWNER");
         _;
     }
 
