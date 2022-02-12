@@ -1,20 +1,4 @@
-# Persona Protocol
-
-Specification: https://www.notion.so/latticexyz/Persona-f35d033e59e147e49e2cd0d2c56a476e
-
-## Installation
-
-### Dependencies
-```
-make update
-```
-
-### Compilation
-```
-make build
-```
-
-### Testing
-```
-make test
-```
+# Persona
+Deployment:
+- Gnosis Chain (100): `0x4d9243430a07d8a3ea87f2ac8463f252f7fc8401`
+- Optimism on Gnosis Chain (300): `0xbec5f944749a91ce94d1ac235c8a5ed20f4ee327` 

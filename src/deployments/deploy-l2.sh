@@ -1,0 +1,1 @@
+forge create PersonaMirror --constructor-args "$1" "$2" --legacy --rpc-url "https://optimism.gnosischain.com" --private-key $3 --force
