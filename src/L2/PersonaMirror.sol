@@ -4,13 +4,15 @@ pragma solidity ^0.8.10;
 import {Base64} from "base64/base64.sol";
 import {LibCustomArt} from "../libraries/LibCustomArt.sol";
 import {LibHelpers} from "../libraries/LibHelpers.sol";
+import {BaseRelayRecipient} from "gsn/BaseRelayRecipient.sol";
 
 interface L2CrossDomainMessenger {
     function xDomainMessageSender() external view returns (address);
 }
 
-contract PersonaMirror {
+contract PersonaMirror is BaseRelayRecipient {
     address immutable personaL1;
+    address public personaOwner;
     L2CrossDomainMessenger immutable ovmL2CrossDomainMessenger;
 
     enum PersonaPermission {
@@ -49,26 +51,55 @@ contract PersonaMirror {
     mapping(address => mapping(address => ActivePersona)) public activePersona;
 
     constructor(address personaL1ContractAddr, address ovmL2CrossDomainMessengerAddr) {
+        personaOwner = msg.sender;
         personaL1 = personaL1ContractAddr;
         ovmL2CrossDomainMessenger = L2CrossDomainMessenger(ovmL2CrossDomainMessengerAddr);
+    }
+
+    /*///////////////////////////////////////////////////////////////
+                            GSN SUPPORT
+    //////////////////////////////////////////////////////////////*/
+
+    function versionRecipient() public pure override returns (string memory) {
+        return "0.0.1";
     }
 
     /*///////////////////////////////////////////////////////////////
                             ACCESS CONTROL
     //////////////////////////////////////////////////////////////*/
 
+    modifier onlyContractOwner() {
+        require(_msgSender() == personaOwner, "ONLY_OWNER");
+        _;
+    }
+
+
     modifier onlyPersonaOwner(uint256 personaId) {
-        require(msg.sender == ownerOf[personaId]);
+        require(_msgSender() == ownerOf[personaId]);
         _;
     }
 
     modifier onlyL1Persona() {
         require(
+            // no need for GSN's _msgSender here as this will come from the cross domain contract
             msg.sender == address(ovmL2CrossDomainMessenger) &&
                 ovmL2CrossDomainMessenger.xDomainMessageSender() == personaL1
         );
         _;
     }
+
+    /*///////////////////////////////////////////////////////////////
+                                ADMIN
+    //////////////////////////////////////////////////////////////*/
+
+    function setTrustedForwarder(address trustedForwarderAddr) public onlyContractOwner {
+        _setTrustedForwarder(trustedForwarderAddr);
+    }
+
+    function setOwner(address newContractOwner) public onlyContractOwner {
+        require(newContractOwner != address(0), "ZERO_ADDR");
+        personaOwner = newContractOwner;
+    } 
 
     /*///////////////////////////////////////////////////////////////
                                 VIEW
@@ -127,13 +158,13 @@ contract PersonaMirror {
     //////////////////////////////////////////////////////////////*/
 
     function impersonate(uint256 personaId, address consumer) public {
-        require(getPermission(personaId, msg.sender) != PersonaPermission.DENY);
-        activePersona[msg.sender][consumer] = ActivePersona(nonce[personaId], personaId);
+        require(getPermission(personaId, _msgSender()) != PersonaPermission.DENY);
+        activePersona[_msgSender()][consumer] = ActivePersona(nonce[personaId], personaId);
     }
 
     function deimpersonate(address consumer) public {
-        require(getActivePersona(msg.sender, consumer) != 0, "NO_ACTIVE_PERSONA");
-        delete activePersona[msg.sender][consumer];
+        require(getActivePersona(_msgSender(), consumer) != 0, "NO_ACTIVE_PERSONA");
+        delete activePersona[_msgSender()][consumer];
     }
 
     function authorize(
