@@ -1,5 +1,5 @@
 specVersion: 0.0.2
-description: Person
+description: Persona
 repository: https://github.com/latticexyz/persona
 schema:
   file: ./schema.graphql
