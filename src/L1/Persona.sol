@@ -27,11 +27,27 @@ contract Persona is ERC721, BaseRelayRecipient {
     L1CrossDomainMessenger immutable ovmL1CrossDomainMessenger;
 
     address public personaOwner;
-    address personaMirrorL2;
-    uint256 currentPersonaId;
+    address public personaMirrorL2;
+    uint256 public currentPersonaId;
 
     // address => can mint
     mapping(address => bool) public isMinter;
+
+    constructor(
+        string memory name,
+        string memory symbol,
+        address ovmL1CrossDomainMessengerAddr
+    ) ERC721(name, symbol) {
+        currentPersonaId = 1;
+        personaOwner = msg.sender;
+        ovmL1CrossDomainMessenger = L1CrossDomainMessenger(
+            ovmL1CrossDomainMessengerAddr
+        );
+    }
+
+    /*///////////////////////////////////////////////////////////////
+                            ACCESS CONTROL
+    //////////////////////////////////////////////////////////////*/
 
     modifier onlyMinter() {
         require(isMinter[_msgSender()], "ONLY_MINTER");
@@ -48,11 +64,6 @@ contract Persona is ERC721, BaseRelayRecipient {
         _;
     }
 
-    constructor(string memory name, string memory symbol, address ovmL1CrossDomainMessengerAddr) ERC721(name, symbol) {
-        personaOwner = msg.sender;
-        ovmL1CrossDomainMessenger = L1CrossDomainMessenger(ovmL1CrossDomainMessengerAddr);
-    }
-
     /*///////////////////////////////////////////////////////////////
                             GSN SUPPORT
     //////////////////////////////////////////////////////////////*/
@@ -64,24 +75,33 @@ contract Persona is ERC721, BaseRelayRecipient {
     /*///////////////////////////////////////////////////////////////
                                ADMIN
     //////////////////////////////////////////////////////////////*/
-    
-    function setTrustedForwarder(address trustedForwarderAddr) public onlyContractOwner {
+
+    function setTrustedForwarder(address trustedForwarderAddr)
+        public
+        onlyContractOwner
+    {
         _setTrustedForwarder(trustedForwarderAddr);
     }
 
-    function setMinter(address minter, bool allowMint) public onlyContractOwner {
+    function setMinter(address minter, bool allowMint)
+        public
+        onlyContractOwner
+    {
         isMinter[minter] = allowMint;
     }
 
     function setOwner(address newContractOwner) public onlyContractOwner {
         require(newContractOwner != address(0), "ZERO_ADDR");
         personaOwner = newContractOwner;
-    } 
-    
-    function setPersonaMirrorL2(address personaMirrorAddr) public onlyContractOwner {
+    }
+
+    function setPersonaMirrorL2(address personaMirrorAddr)
+        public
+        onlyContractOwner
+    {
         require(personaMirrorAddr != address(0), "ZERO_ADDR");
         personaMirrorL2 = personaMirrorAddr;
-    } 
+    }
 
     /*///////////////////////////////////////////////////////////////
                                BRIDGING
@@ -104,12 +124,17 @@ contract Persona is ERC721, BaseRelayRecipient {
         require(personaMirrorL2 != address(0), "ZERO_ADDR");
         ovmL1CrossDomainMessenger.sendMessage(
             personaMirrorL2,
-            abi.encodeWithSignature(
-                "bridgeNuke(uint256)",
-                id
-            ),
+            abi.encodeWithSignature("bridgeNuke(uint256)", id),
             1000000
         );
+    }
+
+    /*///////////////////////////////////////////////////////////////
+                               PERSONA
+    //////////////////////////////////////////////////////////////*/
+
+    function nuke(uint256 personaId) public onlyPersonaOwner(personaId) {
+        _sendNuke(personaId);
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -125,30 +150,38 @@ contract Persona is ERC721, BaseRelayRecipient {
     function approve(address spender, uint256 id) public override {
         address owner = ownerOf[id];
 
-        require(_msgSender() == owner || isApprovedForAll[owner][_msgSender()], "NOT_AUTHORIZED");
+        require(
+            _msgSender() == owner || isApprovedForAll[owner][_msgSender()],
+            "NOT_AUTHORIZED"
+        );
 
         getApproved[id] = spender;
 
         emit Approval(owner, spender, id);
     }
 
-    function setApprovalForAll(address operator, bool approved) public override {
+    function setApprovalForAll(address operator, bool approved)
+        public
+        override
+    {
         isApprovedForAll[_msgSender()][operator] = approved;
 
         emit ApprovalForAll(_msgSender(), operator, approved);
     }
 
-    function transferFrom(
+    function _transferFrom(
         address from,
         address to,
         uint256 id
-    ) public override {
+    ) internal {
         require(from == ownerOf[id], "WRONG_FROM");
 
         require(to != address(0), "INVALID_RECIPIENT");
 
         require(
-            _msgSender() == from || _msgSender() == getApproved[id] || isApprovedForAll[from][_msgSender()],
+            _msgSender() == from ||
+                _msgSender() == getApproved[id] ||
+                isApprovedForAll[from][_msgSender()],
             "NOT_AUTHORIZED"
         );
 
@@ -165,6 +198,14 @@ contract Persona is ERC721, BaseRelayRecipient {
         delete getApproved[id];
 
         emit Transfer(from, to, id);
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public override {
+        _transferFrom(from, to, id);
         _sendChangeOwner(to, id);
     }
 
@@ -173,14 +214,21 @@ contract Persona is ERC721, BaseRelayRecipient {
         address to,
         uint256 id
     ) public override {
-        transferFrom(from, to, id);
+        // we call the internal transfer from
+        _transferFrom(from, to, id);
 
         require(
             to.code.length == 0 ||
-                ERC721TokenReceiver(to).onERC721Received(_msgSender(), from, id, "") ==
+                ERC721TokenReceiver(to).onERC721Received(
+                    _msgSender(),
+                    from,
+                    id,
+                    ""
+                ) ==
                 ERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
         );
+
         _sendChangeOwner(to, id);
     }
 
@@ -190,26 +238,29 @@ contract Persona is ERC721, BaseRelayRecipient {
         uint256 id,
         bytes memory data
     ) public override {
-        transferFrom(from, to, id);
+        _transferFrom(from, to, id);
 
         require(
             to.code.length == 0 ||
-                ERC721TokenReceiver(to).onERC721Received(_msgSender(), from, id, data) ==
+                ERC721TokenReceiver(to).onERC721Received(
+                    _msgSender(),
+                    from,
+                    id,
+                    data
+                ) ==
                 ERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
         );
+
         _sendChangeOwner(to, id);
     }
 
-    function tokenURI(uint256 personaId) public view override returns (string memory) {
+    function tokenURI(uint256 personaId)
+        public
+        view
+        override
+        returns (string memory)
+    {
         return "";
-    }
-
-    /*///////////////////////////////////////////////////////////////
-                               PERSONA
-    //////////////////////////////////////////////////////////////*/
-
-    function nuke(uint256 personaId) public onlyPersonaOwner(personaId) {
-        _sendNuke(personaId);
     }
 }
