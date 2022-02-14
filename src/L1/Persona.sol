@@ -26,9 +26,9 @@ interface ERC721TokenReceiver {
 contract Persona is ERC721, BaseRelayRecipient {
     L1CrossDomainMessenger immutable ovmL1CrossDomainMessenger;
 
-    address public personaOwner;
+    address public contractOwner;
     address public personaMirrorL2;
-    uint256 public currentPersonaId;
+    uint256 internal currentPersonaId;
 
     // address => can mint
     mapping(address => bool) public isMinter;
@@ -39,10 +39,8 @@ contract Persona is ERC721, BaseRelayRecipient {
         address ovmL1CrossDomainMessengerAddr
     ) ERC721(name, symbol) {
         currentPersonaId = 1;
-        personaOwner = msg.sender;
-        ovmL1CrossDomainMessenger = L1CrossDomainMessenger(
-            ovmL1CrossDomainMessengerAddr
-        );
+        contractOwner = msg.sender;
+        ovmL1CrossDomainMessenger = L1CrossDomainMessenger(ovmL1CrossDomainMessengerAddr);
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -55,7 +53,7 @@ contract Persona is ERC721, BaseRelayRecipient {
     }
 
     modifier onlyContractOwner() {
-        require(_msgSender() == personaOwner, "ONLY_CONTRACT_OWNER");
+        require(_msgSender() == contractOwner, "ONLY_CONTRACT_OWNER");
         _;
     }
 
@@ -76,29 +74,20 @@ contract Persona is ERC721, BaseRelayRecipient {
                                ADMIN
     //////////////////////////////////////////////////////////////*/
 
-    function setTrustedForwarder(address trustedForwarderAddr)
-        public
-        onlyContractOwner
-    {
+    function setTrustedForwarder(address trustedForwarderAddr) public onlyContractOwner {
         _setTrustedForwarder(trustedForwarderAddr);
     }
 
-    function setMinter(address minter, bool allowMint)
-        public
-        onlyContractOwner
-    {
+    function setMinter(address minter, bool allowMint) public onlyContractOwner {
         isMinter[minter] = allowMint;
     }
 
     function setOwner(address newContractOwner) public onlyContractOwner {
         require(newContractOwner != address(0), "ZERO_ADDR");
-        personaOwner = newContractOwner;
+        contractOwner = newContractOwner;
     }
 
-    function setPersonaMirrorL2(address personaMirrorAddr)
-        public
-        onlyContractOwner
-    {
+    function setPersonaMirrorL2(address personaMirrorAddr) public onlyContractOwner {
         require(personaMirrorAddr != address(0), "ZERO_ADDR");
         personaMirrorL2 = personaMirrorAddr;
     }
@@ -111,11 +100,7 @@ contract Persona is ERC721, BaseRelayRecipient {
         require(personaMirrorL2 != address(0), "ZERO_ADDR");
         ovmL1CrossDomainMessenger.sendMessage(
             personaMirrorL2,
-            abi.encodeWithSignature(
-                "bridgeChangeOwner(address,uint256)",
-                recipient,
-                id
-            ),
+            abi.encodeWithSignature("bridgeChangeOwner(address,uint256)", recipient, id),
             1000000
         );
     }
@@ -141,29 +126,24 @@ contract Persona is ERC721, BaseRelayRecipient {
                                ERC721
     //////////////////////////////////////////////////////////////*/
 
-    function mint(address to) public onlyMinter {
+    function mint(address to) public onlyMinter returns (uint256 id) {
         _mint(to, currentPersonaId);
         _sendChangeOwner(to, currentPersonaId);
+        id = currentPersonaId;
         currentPersonaId++;
     }
 
     function approve(address spender, uint256 id) public override {
         address owner = ownerOf[id];
 
-        require(
-            _msgSender() == owner || isApprovedForAll[owner][_msgSender()],
-            "NOT_AUTHORIZED"
-        );
+        require(_msgSender() == owner || isApprovedForAll[owner][_msgSender()], "NOT_AUTHORIZED");
 
         getApproved[id] = spender;
 
         emit Approval(owner, spender, id);
     }
 
-    function setApprovalForAll(address operator, bool approved)
-        public
-        override
-    {
+    function setApprovalForAll(address operator, bool approved) public override {
         isApprovedForAll[_msgSender()][operator] = approved;
 
         emit ApprovalForAll(_msgSender(), operator, approved);
@@ -179,9 +159,7 @@ contract Persona is ERC721, BaseRelayRecipient {
         require(to != address(0), "INVALID_RECIPIENT");
 
         require(
-            _msgSender() == from ||
-                _msgSender() == getApproved[id] ||
-                isApprovedForAll[from][_msgSender()],
+            _msgSender() == from || _msgSender() == getApproved[id] || isApprovedForAll[from][_msgSender()],
             "NOT_AUTHORIZED"
         );
 
@@ -219,12 +197,7 @@ contract Persona is ERC721, BaseRelayRecipient {
 
         require(
             to.code.length == 0 ||
-                ERC721TokenReceiver(to).onERC721Received(
-                    _msgSender(),
-                    from,
-                    id,
-                    ""
-                ) ==
+                ERC721TokenReceiver(to).onERC721Received(_msgSender(), from, id, "") ==
                 ERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
         );
@@ -242,12 +215,7 @@ contract Persona is ERC721, BaseRelayRecipient {
 
         require(
             to.code.length == 0 ||
-                ERC721TokenReceiver(to).onERC721Received(
-                    _msgSender(),
-                    from,
-                    id,
-                    data
-                ) ==
+                ERC721TokenReceiver(to).onERC721Received(_msgSender(), from, id, data) ==
                 ERC721TokenReceiver.onERC721Received.selector,
             "UNSAFE_RECIPIENT"
         );
@@ -255,12 +223,7 @@ contract Persona is ERC721, BaseRelayRecipient {
         _sendChangeOwner(to, id);
     }
 
-    function tokenURI(uint256 personaId)
-        public
-        view
-        override
-        returns (string memory)
-    {
+    function tokenURI(uint256 personaId) public view override returns (string memory) {
         return "";
     }
 }

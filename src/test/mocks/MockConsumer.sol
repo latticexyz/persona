@@ -5,20 +5,20 @@ import {PersonaMirror} from "../../L2/PersonaMirror.sol";
 import {console} from "../utils/console.sol";
 
 contract MockConsumer {
-    PersonaMirror persona;
+    PersonaMirror personaMirror;
 
-    constructor(address personaAddress) {
-        persona = PersonaMirror(personaAddress);
+    constructor(address personaMirrorAddress) {
+        personaMirror = PersonaMirror(personaMirrorAddress);
     }
 
     modifier onlyAuthorized() {
-        uint256 personaId = persona.getActivePersona(msg.sender, address(this));
-        require(persona.isAuthorized(personaId, msg.sender, address(this), msg.sig));
+        uint256 personaId = personaMirror.getActivePersona(msg.sender, address(this));
+        require(personaMirror.isAuthorized(personaId, msg.sender, address(this), msg.sig));
         _;
     }
 
     function foo() public view onlyAuthorized returns (uint256) {
-        uint256 personaId = persona.getActivePersona(msg.sender, address(this));
+        uint256 personaId = personaMirror.getActivePersona(msg.sender, address(this));
         return personaId;
     }
 }
