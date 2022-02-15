@@ -204,8 +204,12 @@ contract PersonaMirror is BaseRelayRecipient {
     ) public onlyPersonaOwner(personaId) {
         _personaData(personaId).permissions[user] = PersonaPermission.DENY;
         delete _personaData(personaId).authorizations[user][consumer];
-        // TODO: @smsunarto this can be used to force de-impersonate people
-        delete activePersona[user][consumer];
+
+        // We want to force deimpersonate the user only if they
+        // are currently impersonating as `personaId`
+        if (activePersona[user][consumer].personaId == personaId) {
+            delete activePersona[user][consumer];
+        }
 
         emit Deauthorize(personaId, user, consumer);
     }
