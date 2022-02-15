@@ -12,9 +12,9 @@ interface L2CrossDomainMessenger {
 
 contract PersonaMirror is BaseRelayRecipient {
     event BridgeNuke(uint256 personaId, uint256 nonce);
-    event BridgeChangeOwner(uint256 personaId, address recipient, uint256 nonce);
-    event Impersonate(uint256 personaId, address consumer);
-    event Deimpersonate(uint256 personaId, address consumer);
+    event BridgeChangeOwner(uint256 personaId, address from, address to, uint256 nonce);
+    event Impersonate(uint256 personaId, address user, address consumer);
+    event Deimpersonate(uint256 personaId, address user, address consumer);
     event Authorize(uint256 personaId, address user, address consumer, bytes4[] fnSignatures);
     event Deauthorize(uint256 personaId, address user, address consumer);
 
@@ -172,13 +172,13 @@ contract PersonaMirror is BaseRelayRecipient {
         );
         activePersona[_msgSender()][consumer] = ActivePersona(nonce[personaId], personaId);
 
-        emit Impersonate(personaId, consumer);
+        emit Impersonate(personaId, _msgSender(), consumer);
     }
 
     function deimpersonate(address consumer) public {
         require(getActivePersona(_msgSender(), consumer) != 0, "NO_ACTIVE_PERSONA");
 
-        emit Deimpersonate(activePersona[_msgSender()][consumer].personaId, consumer);
+        emit Deimpersonate(activePersona[_msgSender()][consumer].personaId, _msgSender(), consumer);
 
         delete activePersona[_msgSender()][consumer];
     }
@@ -224,10 +224,11 @@ contract PersonaMirror is BaseRelayRecipient {
         emit BridgeNuke(personaId, nonce[personaId]);
     }
 
-    function bridgeChangeOwner(address recipient, uint256 personaId) public onlyL1Persona {
-        ownerOf[personaId] = recipient;
+    function bridgeChangeOwner(address to, uint256 personaId) public onlyL1Persona {
+        address from = ownerOf[personaId];
+        ownerOf[personaId] = to;
         nonce[personaId] += 1;
 
-        emit BridgeChangeOwner(personaId, recipient, nonce[personaId]);
+        emit BridgeChangeOwner(personaId, from, to, nonce[personaId]);
     }
 }

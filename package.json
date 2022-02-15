@@ -3,13 +3,12 @@
   "version": "0.0.3",
   "description": "Persona",
   "files": [
+    "abi/",
     "src/L1",
     "src/L2",
     "src/libraries",
     "deployment.json",
-    "LICENSE",
-    "Persona.json",
-    "PersonaMirror.json"
+    "LICENSE"
   ],
   "scripts": {
     "release": "release-it",
@@ -19,9 +18,9 @@
     "mint": "zx src/tasks/mint/mint-tasks.mjs",
     "sanity": "zx src/tasks/sanity/sanity-tasks.mjs",
     "// subgraphs": "",
-    "foundry:build": "forge build --force && mv out/Persona.sol/Persona.json Persona.json && mv out/PersonaMirror.sol/PersonaMirror.json PersonaMirror.json",
-    "graph:export-abi": "yarn foundry:build && cp out/Persona.sol/Persona.json subgraphs/L1/abis/",
-    "graph:codegen": "graph codegen subgraphs/L1/subgraph.yaml -o subgraphs/L1/generated",
+    "foundry:build": "forge build --force && cp out/Persona.sol/Persona.json abi/ && cp out/PersonaMirror.sol/PersonaMirror.json abi/",
+    "graph:export-abi": "yarn foundry:build && cp out/Persona.sol/Persona.json subgraphs/L1/abis/ && cp out/PersonaMirror.sol/PersonaMirror.json subgraphs/L2/abis/",
+    "graph:codegen": "yarn graph:export-abi && graph codegen subgraphs/L1/subgraph.yaml -o subgraphs/L1/generated && graph codegen subgraphs/L2/subgraph.yaml -o subgraphs/L2/generated",
     "graph:build:subgraph": "graph build subgraphs/L1/subgraph.yaml -o subgraph-build/L1",
     "graph:build": "yarn graph:export-abi && yarn graph:codegen && yarn graph:build:subgraph",
     "graph:l1:deploy": "graph deploy --node https://api.thegraph.com/deploy/ latticexyz/persona-l1 subgraphs/L1/subgraph.yaml",
