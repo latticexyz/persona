@@ -2,15 +2,15 @@ type Persona @entity {
   id: ID!
   owner: User!
   transfers: [Transfer!]! @derivedFrom(field: "persona")
-  impersonations: [Impersonation!]
-  authorizations: [Authorization!]
+  impersonations: [Impersonation!]!
+  authorizations: [Authorization!]!
 }
 
 type User @entity {
   id: ID!
-  impersonations: [Impersonation!]
+  impersonations: [Impersonation!]!
   ownedPersonas: [Persona!]! @derivedFrom(field: "owner")
-  authorizations: [Authorization!]
+  authorizations: [Authorization!]!
   balance: BigInt!
 }
 
@@ -39,7 +39,7 @@ type Authorization @entity {
   user: User!
   consumer: String!
   permission: PersonaPermission!
-  fnSignatures: [String!]
+  fnSignatures: [String!]!
 }
 
 enum PersonaPermission {

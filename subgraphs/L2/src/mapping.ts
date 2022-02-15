@@ -1,4 +1,4 @@
-import { log, BigInt } from "@graphprotocol/graph-ts";
+import { log, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {
   BridgeNuke,
   BridgeChangeOwner,
@@ -33,16 +33,16 @@ export function handleBridgeChangeOwner(event: BridgeChangeOwner): void {
     from = new User(event.params.from.toHexString());
     from.authorizations = [];
     from.balance = BigInt.fromI32(0);
-  } else {
+  } else if (from) {
     if (from.balance > BigInt.fromI32(0)) {
       from.balance.minus(BigInt.fromI32(1));
     }
   }
 
-  if (to == null) {
+  if (to == null && event.params.to.toHexString() != "0x0000000000000000000000000000000000000000") {
     to = new User(event.params.to.toHexString());
     to.balance = BigInt.fromI32(1);
-  } else {
+  } else if (to) {
     to.balance.plus(BigInt.fromI32(1));
   }
 
@@ -53,14 +53,14 @@ export function handleBridgeChangeOwner(event: BridgeChangeOwner): void {
     persona.owner = event.params.to.toHexString();
 
     for (let i = 0; i < persona.authorizations.length; i++) {
-      let authorization = Authorization.load(persona.authorizations[i]);
-      let user = User.load(authorization.user);
+      let authorization = Authorization.load(persona.authorizations[i])!;
+      let user = User.load(authorization.user)!;
 
       // if user is currently impersonating this persona, remove it
       for (let j = 0; j < user.impersonations.length; j++) {
-        let impersonation = Impersonation.load(user.impersonations[i]);
+        let impersonation = Impersonation.load(user.impersonations[i])!;
         if (impersonation.persona == persona.id) {
-          persona.impersonations.splice(j, 1);
+          user.impersonations.splice(j, 1);
           user.save();
           break;
         }
@@ -83,9 +83,12 @@ export function handleBridgeChangeOwner(event: BridgeChangeOwner): void {
     transfer.block = event.block.number;
     transfer.transactionHash = event.transaction.hash.toHexString();
   }
-
-  from.save();
-  to.save();
+  if (from) {
+    from.save();
+  }
+  if (to) {
+    to.save();
+  }
   persona.save();
   transfer.save();
 }
@@ -96,17 +99,18 @@ export function handleNuke(event: BridgeNuke): void {
     event.params.nonce.toString()
   ]);
 
-  let persona = Persona.load(event.params.personaId.toString());
+  let persona = Persona.load(event.params.personaId.toString())!;
 
   for (let i = 0; i < persona.authorizations.length; i++) {
-    let authorization = Authorization.load(persona.authorizations[i]);
-    let user = User.load(authorization.user);
+    let authorization = Authorization.load(persona.authorizations[i])!;
+    let user = User.load(authorization.user)!;
 
     // if user is currently impersonating this persona, remove it
     for (let j = 0; j < user.impersonations.length; j++) {
-      let impersonation = Impersonation.load(user.impersonations[i]);
+      let impersonation = Impersonation.load(user.impersonations[i])!;
       if (impersonation.persona == persona.id) {
-        persona.impersonations.splice(j, 1);
+        user.impersonations.splice(j, 1);
+        user.save();
         break;
       }
     }
@@ -128,8 +132,8 @@ export function handleImpersonate(event: Impersonate): void {
     event.params.consumer.toHexString()
   ]);
 
-  let user = User.load(event.params.user.toHexString());
-  let persona = Persona.load(event.params.personaId.toString());
+  let user = User.load(event.params.user.toHexString())!;
+  let persona = Persona.load(event.params.personaId.toString())!;
 
   let impersonationId = event.transaction.hash
     .toHexString()
@@ -167,23 +171,23 @@ export function handleDeimpersonate(event: Deimpersonate): void {
     event.params.consumer.toHexString()
   ]);
 
-  let user = User.load(event.params.user.toHexString());
-  let persona = Persona.load(event.params.personaId.toString());
+  let user = User.load(event.params.user.toHexString())!;
+  let persona = Persona.load(event.params.personaId.toString())!;
 
   for (let i = 0; i < user.impersonations.length; i++) {
-    let impersonation = Impersonation.load(user.impersonations[i]);
+    let impersonation = Impersonation.load(user.impersonations[i])!;
 
     if (
       impersonation.user == event.params.user.toHexString() &&
       impersonation.consumer == event.params.consumer.toHexString()
     ) {
-      persona.impersonations.splice(i, 1);
+      user.impersonations.splice(i, 1);
       break;
     }
   }
 
   for (let i = 0; i < persona.impersonations.length; i++) {
-    let impersonation = Impersonation.load(persona.impersonations[i]);
+    let impersonation = Impersonation.load(persona.impersonations[i])!;
 
     if (
       impersonation.user == event.params.user.toHexString() &&
@@ -206,8 +210,8 @@ export function handleAuthorize(event: Authorize): void {
     event.params.fnSignatures.toString()
   ]);
 
-  let user = User.load(event.params.user.toHexString());
-  let persona = Persona.load(event.params.personaId.toString());
+  let user = User.load(event.params.user.toHexString())!;
+  let persona = Persona.load(event.params.personaId.toString())!;
 
   let authorizationId = event.transaction.hash
     .toHexString()
@@ -219,7 +223,7 @@ export function handleAuthorize(event: Authorize): void {
     authorization.persona = event.params.personaId.toString();
     authorization.user = event.params.user.toHexString();
     authorization.consumer = event.params.consumer.toHexString();
-    authorization.fnSignatures = event.params.fnSignatures.map(x => x.toHexString());
+    authorization.fnSignatures = event.params.fnSignatures.map<string>((x: Bytes) => x.toHexString());
   }
 
   if (user.authorizations == null) {
@@ -245,11 +249,11 @@ export function handleDeauthorize(event: Deauthorize): void {
     event.params.consumer.toHexString()
   ]);
 
-  let user = User.load(event.params.user.toHexString());
-  let persona = Persona.load(event.params.personaId.toString());
+  let user = User.load(event.params.user.toHexString())!;
+  let persona = Persona.load(event.params.personaId.toString())!;
 
   for (let i = 0; i < persona.authorizations.length; i++) {
-    let authorization = Authorization.load(persona.authorizations[i]);
+    let authorization = Authorization.load(persona.authorizations[i])!;
 
     if (
       authorization.user == event.params.user.toHexString() &&
@@ -261,19 +265,19 @@ export function handleDeauthorize(event: Deauthorize): void {
   }
 
   for (let i = 0; i < user.impersonations.length; i++) {
-    let impersonation = Impersonation.load(user.impersonations[i]);
+    let impersonation = Impersonation.load(user.impersonations[i])!;
 
     if (
       impersonation.user == event.params.user.toHexString() &&
       impersonation.consumer == event.params.consumer.toHexString()
     ) {
-      persona.impersonations.splice(i, 1);
+      user.impersonations.splice(i, 1);
       break;
     }
   }
 
   for (let i = 0; i < persona.impersonations.length; i++) {
-    let impersonation = Impersonation.load(persona.impersonations[i]);
+    let impersonation = Impersonation.load(persona.impersonations[i])!;
 
     if (
       impersonation.user == event.params.user.toHexString() &&

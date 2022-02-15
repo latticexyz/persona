@@ -18,21 +18,21 @@ export function handleTransfer(event: TransferEvent): void {
   let transfer = Transfer.load(transferId);
   let instance = Persona.bind(event.address);
 
-  if (previousOwner == null) {
+  if (previousOwner == null &&
+    event.params.from.toHexString() != "0x0000000000000000000000000000000000000000") {
     previousOwner = new Owner(event.params.from.toHexString());
-
     previousOwner.balance = BigInt.fromI32(0);
-  } else {
+  } else if (previousOwner) {
     let prevBalance = previousOwner.balance;
     if (prevBalance > BigInt.fromI32(0)) {
       previousOwner.balance = prevBalance.minus(BigInt.fromI32(1));
     }
   }
 
-  if (newOwner == null) {
+  if (newOwner == null && event.params.to.toHexString() != "0x0000000000000000000000000000000000000000") {
     newOwner = new Owner(event.params.to.toHexString());
     newOwner.balance = BigInt.fromI32(1);
-  } else {
+  } else if (newOwner) {
     let prevBalance = newOwner.balance;
     newOwner.balance = prevBalance.plus(BigInt.fromI32(1));
   }
@@ -56,9 +56,12 @@ export function handleTransfer(event: TransferEvent): void {
     transfer.block = event.block.number;
     transfer.transactionHash = event.transaction.hash.toHexString();
   }
-
-  previousOwner.save();
-  newOwner.save();
+  if (previousOwner) {
+    previousOwner.save();
+  }
+  if (newOwner) {
+    newOwner.save();
+  }
   persona.save();
   transfer.save();
 }
