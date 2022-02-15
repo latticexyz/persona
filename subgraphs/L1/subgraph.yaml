@@ -8,7 +8,7 @@ dataSources:
     name: Persona
     network: xdai
     source:
-      address: "0x4d9243430a07d8a3ea87f2ac8463f252f7fc8401"
+      address: "0x744e6a2e3b88ca682abbeb32cb4b09110f9eedaf"
       abi: Persona
       startBlock: 20591121
     mapping:

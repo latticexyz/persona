@@ -8,7 +8,7 @@ dataSources:
     name: PersonaMirror
     network: xdai
     source:
-      address: "0xbec5f944749a91ce94d1ac235c8a5ed20f4ee327"
+      address: "0x3853b72c97393e05973b3895585be169605eb41e"
       abi: PersonaMirror
       startBlock: 20591121
     mapping:
