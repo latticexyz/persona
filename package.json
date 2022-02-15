@@ -34,8 +34,8 @@
     "type": "git",
     "url": "git+https://github.com/latticexyz/persona.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Lattice",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/latticexyz/persona/issues"
   },
