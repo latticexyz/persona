@@ -1,0 +1,49 @@
+type Persona @entity {
+  id: ID!
+  owner: User!
+  transfers: [Transfer!]! @derivedFrom(field: "persona")
+  impersonations: [Impersonation!]
+  authorizations: [Authorization!]
+}
+
+type User @entity {
+  id: ID!
+  impersonations: [Impersonation!]
+  ownedPersonas: [Persona!]! @derivedFrom(field: "owner")
+  authorizations: [Authorization!]
+  balance: BigInt!
+}
+
+type Transfer @entity {
+  id: ID!
+  persona: Persona!
+  # Empty from is minting
+  from: User
+  # Empty to is burning
+  to: User
+  timestamp: BigInt!
+  block: BigInt!
+  transactionHash: String!
+}
+
+type Impersonation @entity {
+  id: ID!
+  persona: Persona!
+  user: User!
+  consumer: String!
+}
+
+type Authorization @entity {
+  id: ID!
+  persona: Persona!
+  user: User!
+  consumer: String!
+  permission: PersonaPermission!
+  fnSignatures: [String!]
+}
+
+enum PersonaPermission {
+  DENY
+  CONSUMER_SPECIFIC
+  FUNCTION_SPECIFIC
+}

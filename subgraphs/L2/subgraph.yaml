@@ -1,0 +1,40 @@
+specVersion: 0.0.2
+description: PersonaMirror
+repository: https://github.com/latticexyz/persona
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: PersonaMirror
+    network: xdai
+    source:
+      address: "0xbec5f944749a91ce94d1ac235c8a5ed20f4ee327"
+      abi: PersonaMirror
+      startBlock: 20591121
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Persona
+        - User
+        - Transfer
+        - Authorization
+        - Impersonation
+      abis:
+        - name: PersonaMirror
+          file: ./abis/PersonaMirror.json
+      eventHandlers:
+        - event: BridgeNuke(uint256,uint256)
+          handler: handleNuke
+        - event: BridgeChangeOwner(uint256,address,address,uint256)
+          handler: handleChangeOwner
+        - event: Impersonate(uint256,address,address)
+          handler: handleImpersonate
+        - event: Deimpersonate(uint256,address,address)
+          handler: handleDeimpersonate
+        - event: Authorize(uint256,address,address,bytes4[])
+          handler: handleAuthorize
+        - event: Deauthorize(uint256,address,address)
+          handler: handleDeauthorize
+      file: ./src/mapping.ts
