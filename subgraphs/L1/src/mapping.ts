@@ -34,7 +34,7 @@ export function handleTransfer(event: TransferEvent): void {
     newOwner.balance = BigInt.fromI32(1);
   } else {
     let prevBalance = newOwner.balance;
-    newOwner.balance = prevBalance.minus(BigInt.fromI32(1));
+    newOwner.balance = prevBalance.plus(BigInt.fromI32(1));
   }
 
   if (persona == null) {
