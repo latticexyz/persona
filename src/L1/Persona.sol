@@ -129,7 +129,6 @@ contract Persona is ERC721, BaseRelayRecipient {
     function mint(address to) public onlyMinter returns (uint256 id) {
         _mint(to, currentPersonaId);
         _sendChangeOwner(to, currentPersonaId);
-        id = currentPersonaId;
         currentPersonaId++;
     }
 
