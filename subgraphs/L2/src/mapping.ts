@@ -9,7 +9,7 @@ import {
 } from "../generated/PersonaMirror/PersonaMirror";
 import { Persona, User, Transfer, Authorization, Impersonation } from "../generated/schema";
 
-export function handleBridgeChangeOwner(event: BridgeChangeOwner): void {
+export function handleChangeOwner(event: BridgeChangeOwner): void {
   log.debug("BridgeChangeOwner detected. Persona ID: {} | From: {} | To: {} | Nonce: {}", [
     event.params.personaId.toString(),
     event.params.from.toHexString(),
