@@ -24,7 +24,7 @@ contract PersonaTest is BaseTest {
     function setUp() public {
         vm.startPrank(deployer);
         bridge = new MockL2Bridge();
-        persona = new Persona("L", "L", address(bridge));
+        persona = new Persona("L", "L", address(bridge), address(0));
         personaMirror = new PersonaMirror(address(persona), address(bridge));
         persona.setPersonaMirrorL2(address(personaMirror));
         consumer = new MockConsumer(address(personaMirror));

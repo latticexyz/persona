@@ -12,6 +12,13 @@ interface L1CrossDomainMessenger {
     ) external;
 }
 
+interface PersonaTokenURIGenerator {
+    function generateTokenURI(
+        uint256 personaId,
+        address owner 
+    ) external view returns (string memory);
+}
+
 /// @notice A generic interface for a contract which properly accepts ERC721 tokens.
 /// @author Solmate (https://github.com/Rari-Capital/solmate/blob/main/src/tokens/ERC721.sol)
 interface ERC721TokenReceiver {
@@ -30,17 +37,21 @@ contract Persona is ERC721, BaseRelayRecipient {
     address public personaMirrorL2;
     uint256 internal currentPersonaId;
 
+    PersonaTokenURIGenerator public personaTokenURIGenerator;
+
     // address => can mint
     mapping(address => bool) public isMinter;
 
     constructor(
         string memory name,
         string memory symbol,
-        address ovmL1CrossDomainMessengerAddr
+        address ovmL1CrossDomainMessengerAddr,
+        address personaTokenURIGeneratorAddr
     ) ERC721(name, symbol) {
         currentPersonaId = 1;
         contractOwner = msg.sender;
         ovmL1CrossDomainMessenger = L1CrossDomainMessenger(ovmL1CrossDomainMessengerAddr);
+        personaTokenURIGenerator = PersonaTokenURIGenerator(personaTokenURIGeneratorAddr);
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -80,6 +91,10 @@ contract Persona is ERC721, BaseRelayRecipient {
 
     function setMinter(address minter, bool allowMint) public onlyContractOwner {
         isMinter[minter] = allowMint;
+    }
+
+    function setPersonaTokenURIGeneratorAddress(address personaTokenURIGeneratorAddr) public onlyContractOwner {
+        personaTokenURIGenerator = PersonaTokenURIGenerator(personaTokenURIGeneratorAddr);
     }
 
     function setOwner(address newContractOwner) public onlyContractOwner {
@@ -129,6 +144,7 @@ contract Persona is ERC721, BaseRelayRecipient {
     function mint(address to) public onlyMinter returns (uint256 id) {
         _mint(to, currentPersonaId);
         _sendChangeOwner(to, currentPersonaId);
+        id = currentPersonaId;
         currentPersonaId++;
     }
 
@@ -223,6 +239,7 @@ contract Persona is ERC721, BaseRelayRecipient {
     }
 
     function tokenURI(uint256 personaId) public view override returns (string memory) {
-        return "";
+        require(personaId < currentPersonaId, "TOKEN_DOES_NOT_EXIST");
+        return personaTokenURIGenerator.generateTokenURI(personaId, ownerOf[personaId]);
     }
 }
