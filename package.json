@@ -25,10 +25,10 @@
     "graph:build": "yarn graph:export-abi && yarn graph:codegen && yarn graph:build:subgraph",
     "// L1": "",
     "graph:l1:deploy": "graph deploy --node https://api.thegraph.com/deploy/ latticexyz/persona-l1 subgraphs/L1/subgraph.yaml",
-    "// local deployment and testing": "",
-    "graph:l1:create-local": "graph create --node http://localhost:8020/ latticexyz/persona-l1 subgraphs/L1/subgraph.yaml",
-    "graph:l1:remove-local": "graph remove --node http://localhost:8020/ latticexyz/persona-l1 subgraphs/L1/subgraph.yaml",
-    "graph:l1:deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 latticexyz/persona-l1 subgraphs/L1/subgraph.yaml"
+    "// L2": "",
+    "graph:l2:create": "graph create --node https://admin-graph.lattice.xyz/ latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
+    "graph:l2:remove": "graph remove --node https://admin-graph.lattice.xyz/ latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
+    "graph:l2:deploy": "graph deploy --node https://admin-graph.lattice.xyz/ --ipfs https://ipfs-graph.lattice.xyz latticexyz/persona-l2 subgraphs/L2/subgraph.yaml"
   },
   "repository": {
     "type": "git",
