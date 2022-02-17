@@ -6,12 +6,14 @@ import {BaseTest, console} from "./base/BaseTest.sol";
 import {MockL2Bridge} from "./mocks/MockL2Bridge.sol";
 import {MockConsumer} from "./mocks/MockConsumer.sol";
 import {Persona} from "../L1/Persona.sol";
+import {EmptyPersonaTokenURIGenerator} from "../L1/EmptyPersonaTokenURIGenerator.sol";
 import {PersonaMirror} from "../L2/PersonaMirror.sol";
 import "./utils/console.sol";
 
 contract PersonaTest is BaseTest {
     MockL2Bridge bridge;
     Persona persona;
+    EmptyPersonaTokenURIGenerator tokenURIGenerator; 
     PersonaMirror personaMirror;
     MockConsumer consumer;
 
@@ -24,6 +26,7 @@ contract PersonaTest is BaseTest {
     function setUp() public {
         vm.startPrank(deployer);
         bridge = new MockL2Bridge();
+        tokenURIGenerator = new EmptyPersonaTokenURIGenerator();
         persona = new Persona("L", "L", address(bridge), address(0));
         personaMirror = new PersonaMirror(address(persona), address(bridge));
         persona.setPersonaMirrorL2(address(personaMirror));
@@ -39,6 +42,12 @@ contract PersonaTest is BaseTest {
         vm.prank(deployer);
         persona.setOwner(alice);
         assertEq(persona.contractOwner(), alice);
+    }
+
+    function testSetTokenURIGenerator() public {
+        vm.prank(deployer);
+        persona.setPersonaTokenURIGeneratorAddress(address(tokenURIGenerator));
+        assertEq(address(persona.personaTokenURIGenerator()), address(tokenURIGenerator));
     }
 
     function testFailSetOwnerZeroAddr() public {

@@ -1,0 +1,1 @@
+cast call $1 "tokenURI(uint256)" "$2" --rpc-url "https://rpc.gnosischain.com"
