@@ -12,7 +12,7 @@ const NAME = "Persona";
 const SYMBOL = "LTX-PERSONA";
 const PRIVATE_KEY = await question('Private key: ')
 
-const {stdout: tokenURIGeneratorOutput} = await $`bash src/deployments/deploy-empty-persona-token-uri-generator.sh ${PRIVATE_KEY}`
+const {stdout: tokenURIGeneratorOutput} = await $`bash src/deployments/deploy-simple-persona-token-uri-generator.sh ${PRIVATE_KEY}`
 const tokenURIGeneratorAddress = parseForgeCreateDeploy(tokenURIGeneratorOutput)
 
 const {stdout: l1Output} = await $`bash src/deployments/deploy-l1.sh ${NAME} ${SYMBOL} ${L1_BRIDGE} ${tokenURIGeneratorAddress} ${PRIVATE_KEY}`

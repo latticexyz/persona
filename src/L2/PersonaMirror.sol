@@ -3,8 +3,6 @@ pragma solidity ^0.8.10;
 
 import {Base64} from "base64/base64.sol";
 import {BaseRelayRecipient} from "gsn/BaseRelayRecipient.sol";
-import {LibCustomArt} from "../libraries/LibCustomArt.sol";
-import {LibHelpers} from "../libraries/LibHelpers.sol";
 
 interface L2CrossDomainMessenger {
     function xDomainMessageSender() external view returns (address);
