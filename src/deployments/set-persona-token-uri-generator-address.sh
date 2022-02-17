@@ -1,0 +1,1 @@
+cast send $1 "setPersonaTokenURIGeneratorAddress(address)" "$2" --rpc-url "https://rpc.xdaichain.com" --private-key $3 --gas 100000

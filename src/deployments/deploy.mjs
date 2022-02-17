@@ -12,7 +12,10 @@ const NAME = "Persona";
 const SYMBOL = "LTX-PERSONA";
 const PRIVATE_KEY = await question('Private key: ')
 
-const {stdout: l1Output} = await $`bash src/deployments/deploy-l1.sh ${NAME} ${SYMBOL} ${L1_BRIDGE} ${PRIVATE_KEY}`
+const {stdout: tokenURIGeneratorOutput} = await $`bash src/deployments/deploy-empty-persona-token-uri-generator.sh ${PRIVATE_KEY}`
+const tokenURIGeneratorAddress = parseForgeCreateDeploy(tokenURIGeneratorOutput)
+
+const {stdout: l1Output} = await $`bash src/deployments/deploy-l1.sh ${NAME} ${SYMBOL} ${L1_BRIDGE} ${tokenURIGeneratorAddress} ${PRIVATE_KEY}`
 const l1Address = parseForgeCreateDeploy(l1Output)
 
 console.log(chalk.green(`L1 Persona contract deployed at: ${l1Address}`))

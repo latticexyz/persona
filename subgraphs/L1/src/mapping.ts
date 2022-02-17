@@ -1,9 +1,9 @@
 import { log, BigInt } from '@graphprotocol/graph-ts';
-import { Persona, Transfer as TransferEvent } from '../generated/Persona/Persona';
-import { Persona as PersonaEntity, Owner, Transfer } from '../generated/schema';
+import { Persona as PersonaContract, Transfer as TransferEvent } from '../generated/Persona/Persona';
+import { Persona, Owner, Transfer } from '../generated/schema';
 
 export function handleTransfer(event: TransferEvent): void {
-  log.debug('Transfer detected. From: {} | To: {} | TokenID: {}', [
+  log.info('Transfer detected. From: {} | To: {} | TokenID: {}', [
     event.params.from.toHexString(),
     event.params.to.toHexString(),
     event.params.id.toHexString(),
@@ -11,12 +11,12 @@ export function handleTransfer(event: TransferEvent): void {
 
   let previousOwner = Owner.load(event.params.from.toHexString());
   let newOwner = Owner.load(event.params.to.toHexString());
-  let persona = PersonaEntity.load(event.params.id.toHexString());
+  let persona = Persona.load(event.params.id.toHexString());
   let transferId = event.transaction.hash
     .toHexString()
     .concat(':'.concat(event.transactionLogIndex.toHexString()));
   let transfer = Transfer.load(transferId);
-  let instance = Persona.bind(event.address);
+  let instance = PersonaContract.bind(event.address);
 
   if (previousOwner == null &&
     event.params.from.toHexString() != "0x0000000000000000000000000000000000000000") {
@@ -38,10 +38,12 @@ export function handleTransfer(event: TransferEvent): void {
   }
 
   if (persona == null) {
-    persona = new PersonaEntity(event.params.id.toHexString());
+    persona = new Persona(event.params.id.toHexString());
     let uri = instance.try_tokenURI(event.params.id);
     if (!uri.reverted) {
       persona.uri = uri.value;
+    } else {
+      throw new Error("tokenURI reverted");
     }
   }
 

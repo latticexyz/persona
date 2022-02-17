@@ -1,7 +1,7 @@
 type Persona @entity {
   id: ID!
-  owner: Owner
-  uri: String
+  owner: Owner!
+  uri: String!
   transfers: [Transfer!]! @derivedFrom(field: "persona")
 }
 
