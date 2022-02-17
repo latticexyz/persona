@@ -51,7 +51,6 @@ contract SimplePersonaTokenURIGenerator is PersonaTokenURIGenerator {
                     unicode'", "description": "Personas embody the identity of players on the Lattice Protocol.\\n\\nView this NFT at [https://lattice.xyz/persona/',
                     idString,
                     '](https://lattice.xyz/persona/',idString,
-
                     ')"}'
                 )
             );
