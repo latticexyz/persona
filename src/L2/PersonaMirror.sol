@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {Base64} from "base64/base64.sol";
-import {BaseRelayRecipient} from "gsn/BaseRelayRecipient.sol";
+import {ERC2771Recipient} from "../../lib/gsn/packages/contracts/src/ERC2771Recipient.sol";
 import {LibCustomArt} from "../libraries/LibCustomArt.sol";
 import {LibHelpers} from "../libraries/LibHelpers.sol";
 
@@ -10,7 +10,7 @@ interface L2CrossDomainMessenger {
     function xDomainMessageSender() external view returns (address);
 }
 
-contract PersonaMirror is BaseRelayRecipient {
+contract PersonaMirror is ERC2771Recipient {
     event BridgeNuke(uint256 personaId, uint256 nonce);
     event BridgeChangeOwner(uint256 personaId, address from, address to, uint256 nonce);
     event Impersonate(uint256 personaId, address user, address consumer);

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {ERC721} from "solmate/tokens/ERC721.sol";
-import {BaseRelayRecipient} from "gsn/BaseRelayRecipient.sol";
+import {ERC2771Recipient} from "../../lib/gsn/packages/contracts/src/ERC2771Recipient.sol";
 
 interface L1CrossDomainMessenger {
     function sendMessage(
@@ -30,7 +30,7 @@ interface ERC721TokenReceiver {
     ) external returns (bytes4);
 }
 
-contract Persona is ERC721, BaseRelayRecipient {
+contract Persona is ERC721, ERC2771Recipient {
     L1CrossDomainMessenger immutable ovmL1CrossDomainMessenger;
 
     address public contractOwner;

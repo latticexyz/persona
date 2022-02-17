@@ -355,6 +355,16 @@ contract PersonaTest is BaseTest {
         assertTrue(personaMirror.getActivePersona(personaOwner, address(consumer)) == 0);
     }
 
+    function testBridgeMint() public {
+        vm.prank(deployer);
+        persona.setMinter(minter, true);
+        vm.stopPrank();
+        vm.startPrank(minter);
+        uint256 id = persona.mint(bob);
+        vm.stopPrank();
+        require(personaMirror.ownerOf(id) == bob);
+    }
+
     // Nuke \\
     // TODO: @namra need to add test for nuke bridging
 
