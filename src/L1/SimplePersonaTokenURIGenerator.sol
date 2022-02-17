@@ -54,6 +54,5 @@ contract SimplePersonaTokenURIGenerator is PersonaTokenURIGenerator {
                     ')"}'
                 )
             );
-        return "";
     }
 }
