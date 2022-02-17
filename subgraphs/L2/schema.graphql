@@ -2,15 +2,15 @@ type Persona @entity {
   id: ID!
   owner: User!
   transfers: [Transfer!]! @derivedFrom(field: "persona")
-  impersonations: [Impersonation!]!
-  authorizations: [Authorization!]!
+  impersonations: [Impersonation!]! @derivedFrom(field: "persona")
+  authorizations: [Authorization!]! @derivedFrom(field: "persona")
 }
 
 type User @entity {
   id: ID!
-  impersonations: [Impersonation!]!
+  impersonations: [Impersonation!]! @derivedFrom(field: "user")
   ownedPersonas: [Persona!]! @derivedFrom(field: "owner")
-  authorizations: [Authorization!]!
+  authorizations: [Authorization!]! @derivedFrom(field: "user")
   balance: BigInt!
 }
 

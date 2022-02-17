@@ -6,12 +6,12 @@ export function handleTransfer(event: TransferEvent): void {
   log.info('Transfer detected. From: {} | To: {} | TokenID: {}', [
     event.params.from.toHexString(),
     event.params.to.toHexString(),
-    event.params.id.toHexString(),
+    event.params.id.toString(),
   ]);
 
   let previousOwner = Owner.load(event.params.from.toHexString());
   let newOwner = Owner.load(event.params.to.toHexString());
-  let persona = Persona.load(event.params.id.toHexString());
+  let persona = Persona.load(event.params.id.toString());
   let transferId = event.transaction.hash
     .toHexString()
     .concat(':'.concat(event.transactionLogIndex.toHexString()));
@@ -38,7 +38,7 @@ export function handleTransfer(event: TransferEvent): void {
   }
 
   if (persona == null) {
-    persona = new Persona(event.params.id.toHexString());
+    persona = new Persona(event.params.id.toString());
     let uri = instance.try_tokenURI(event.params.id);
     if (!uri.reverted) {
       persona.uri = uri.value;
@@ -51,7 +51,7 @@ export function handleTransfer(event: TransferEvent): void {
 
   if (transfer == null) {
     transfer = new Transfer(transferId);
-    transfer.persona = event.params.id.toHexString();
+    transfer.persona = event.params.id.toString();
     transfer.from = event.params.from.toHexString();
     transfer.to = event.params.to.toHexString();
     transfer.timestamp = event.block.timestamp;
