@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "release": "release-it",
+    "prepare": "git pull --recurse-submodules",
     "// deployment and tasks": "",
     "deploy": "zx src/deployments/deploy.mjs",
     "redeploy-l2": "zx src/deployments/redeploy-l2.mjs",
