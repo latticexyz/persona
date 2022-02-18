@@ -13,10 +13,7 @@ interface L1CrossDomainMessenger {
 }
 
 interface PersonaTokenURIGenerator {
-    function generateTokenURI(
-        uint256 personaId,
-        address owner 
-    ) external view returns (string memory);
+    function generateTokenURI(uint256 personaId, address owner) external view returns (string memory);
 }
 
 /// @notice A generic interface for a contract which properly accepts ERC721 tokens.
@@ -31,11 +28,13 @@ interface ERC721TokenReceiver {
 }
 
 contract Persona is ERC721, BaseRelayRecipient {
-    L1CrossDomainMessenger immutable ovmL1CrossDomainMessenger;
+    event NewPersonaTokenURIGenerator(address indexed generator);
+
+    L1CrossDomainMessenger public immutable ovmL1CrossDomainMessenger;
 
     address public contractOwner;
     address public personaMirrorL2;
-    uint256 internal currentPersonaId;
+    uint256 public currentPersonaId;
 
     PersonaTokenURIGenerator public personaTokenURIGenerator;
 
@@ -95,6 +94,8 @@ contract Persona is ERC721, BaseRelayRecipient {
 
     function setPersonaTokenURIGeneratorAddress(address personaTokenURIGeneratorAddr) public onlyContractOwner {
         personaTokenURIGenerator = PersonaTokenURIGenerator(personaTokenURIGeneratorAddr);
+
+        emit NewPersonaTokenURIGenerator(personaTokenURIGeneratorAddr);
     }
 
     function setOwner(address newContractOwner) public onlyContractOwner {
