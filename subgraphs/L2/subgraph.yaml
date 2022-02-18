@@ -25,16 +25,16 @@ dataSources:
         - name: PersonaMirror
           file: ./abis/PersonaMirror.json
       eventHandlers:
-        - event: BridgeNuke(uint256,uint256)
+        - event: BridgeNuke(indexed uint256,uint256)
           handler: handleNuke
-        - event: BridgeChangeOwner(uint256,address,address,uint256)
+        - event: BridgeChangeOwner(indexed uint256,indexed address,indexed address,uint256)
           handler: handleChangeOwner
-        - event: Impersonate(uint256,address,address)
+        - event: Impersonate(indexed uint256,indexed address,indexed address)
           handler: handleImpersonate
-        - event: Deimpersonate(uint256,address,address)
+        - event: Deimpersonate(indexed uint256,indexed address,indexed address)
           handler: handleDeimpersonate
-        - event: Authorize(uint256,address,address,bytes4[])
+        - event: Authorize(indexed uint256,indexed address,indexed address,bytes4[])
           handler: handleAuthorize
-        - event: Deauthorize(uint256,address,address)
+        - event: Deauthorize(indexed uint256,indexed address,indexed address)
           handler: handleDeauthorize
       file: ./src/mapping.ts

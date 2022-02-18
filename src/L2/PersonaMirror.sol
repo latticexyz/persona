@@ -57,10 +57,10 @@ contract PersonaMirror is BaseRelayRecipient {
     // user address => consumer contract => active persona
     mapping(address => mapping(address => ActivePersona)) public activePersona;
 
-    constructor(address _personaL1, address _ovmL2CrossDomainMessenger) {
+    constructor(address personaL1Addr, address ovmL2CrossDomainMessengerAddr) {
         personaOwner = msg.sender;
-        personaL1 = _personaL1;
-        ovmL2CrossDomainMessenger = L2CrossDomainMessenger(_ovmL2CrossDomainMessenger);
+        personaL1 = personaL1Addr;
+        ovmL2CrossDomainMessenger = L2CrossDomainMessenger(ovmL2CrossDomainMessengerAddr);
     }
 
     /*///////////////////////////////////////////////////////////////

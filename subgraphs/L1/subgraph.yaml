@@ -25,4 +25,6 @@ dataSources:
       eventHandlers:
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
+        - event: NewPersonaTokenURIGenerator(indexed address)
+          handler: handleNewPersonaTokenURIGenerator
       file: ./src/mapping.ts
