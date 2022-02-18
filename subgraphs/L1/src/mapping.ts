@@ -93,7 +93,7 @@ export function handleNewPersonaTokenURIGenerator(event: NewPersonaTokenURIGener
   let currentPersonaId = callResult.value;
 
   // Persona starts at 1
-  for (let id = BigInt.fromI32(0); id < currentPersonaId; id = id.plus(BigInt.fromI32(1))) {
+  for (let id = BigInt.fromI32(1); id.lt(currentPersonaId); id = id.plus(BigInt.fromI32(1))) {
     let persona = Persona.load(id.toString());
 
     if (persona) {
