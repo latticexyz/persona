@@ -9,12 +9,12 @@ interface L2CrossDomainMessenger {
 }
 
 contract PersonaMirror is BaseRelayRecipient {
-    event BridgeNuke(uint256 personaId, uint256 nonce);
-    event BridgeChangeOwner(uint256 personaId, address from, address to, uint256 nonce);
-    event Impersonate(uint256 personaId, address user, address consumer);
-    event Deimpersonate(uint256 personaId, address user, address consumer);
-    event Authorize(uint256 personaId, address user, address consumer, bytes4[] fnSignatures);
-    event Deauthorize(uint256 personaId, address user, address consumer);
+    event BridgeNuke(uint256 indexed personaId, uint256 nonce);
+    event BridgeChangeOwner(uint256 indexed personaId, address indexed from, address indexed to, uint256 nonce);
+    event Impersonate(uint256 indexed personaId, address indexed user, address indexed consumer);
+    event Deimpersonate(uint256 indexed personaId, address indexed user, address indexed consumer);
+    event Authorize(uint256 indexed personaId, address indexed user, address indexed consumer, bytes4[] fnSignatures);
+    event Deauthorize(uint256 indexed personaId, address indexed user, address indexed consumer);
 
     L2CrossDomainMessenger immutable ovmL2CrossDomainMessenger;
     address immutable personaL1;
