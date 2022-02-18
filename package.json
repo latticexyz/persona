@@ -1,6 +1,6 @@
 {
   "name": "@latticexyz/persona",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "Persona",
   "files": [
     "abi/",
@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "release": "release-it",
-    "prepare": "git pull --recurse-submodules",
+    "prepare": "git submodule update --init --recursive",
     "// deployment and tasks": "",
     "deploy": "zx src/deployments/deploy.mjs",
     "redeploy-l2": "zx src/deployments/redeploy-l2.mjs",
