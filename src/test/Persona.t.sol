@@ -13,7 +13,7 @@ import "./utils/console.sol";
 contract PersonaTest is BaseTest {
     MockL2Bridge bridge;
     Persona persona;
-    EmptyPersonaTokenURIGenerator tokenURIGenerator; 
+    EmptyPersonaTokenURIGenerator tokenURIGenerator;
     PersonaMirror personaMirror;
     MockConsumer consumer;
 
@@ -41,6 +41,7 @@ contract PersonaTest is BaseTest {
     function testSetOwner() public {
         vm.prank(deployer);
         persona.setOwner(alice);
+
         assertEq(persona.contractOwner(), alice);
     }
 
@@ -58,12 +59,14 @@ contract PersonaTest is BaseTest {
     function testSetMinterTrue() public {
         vm.prank(deployer);
         persona.setMinter(minter, true);
+
         assertTrue(persona.isMinter(minter));
     }
 
     function testSetMinterFalse() public {
         vm.prank(deployer);
         persona.setMinter(minter, false);
+
         assertTrue(!persona.isMinter(minter));
     }
 
@@ -71,12 +74,14 @@ contract PersonaTest is BaseTest {
     function _mintTo(address recipient) internal returns (uint256 id) {
         vm.prank(deployer);
         persona.setMinter(minter, true);
+
         vm.prank(minter);
         id = persona.mint(recipient);
     }
 
     function testMint() public {
         _mintTo(personaOwner);
+
         assertEq(persona.balanceOf(personaOwner), 1);
         assertEq(persona.ownerOf(1), personaOwner);
     }
@@ -84,6 +89,7 @@ contract PersonaTest is BaseTest {
     function testFailMintAsNonMinter() public {
         vm.prank(deployer);
         persona.setMinter(minter, true);
+
         vm.prank(alice);
         persona.mint(personaOwner);
     }
@@ -97,29 +103,30 @@ contract PersonaTest is BaseTest {
         address user,
         address targetConsumer
     ) internal {
-        vm.prank(personaOwner);
         personaMirror.authorize(id, user, targetConsumer, new bytes4[](0));
     }
 
     function _authorizeFunctionSpecific(
         uint256 id,
         address user,
-        address targetConsumer,
-        bytes4[] memory fnSignatures
+        address targetConsumer
     ) internal {
-        vm.prank(personaOwner);
+        bytes4[] memory fnSignatures = new bytes4[](1);
+        bytes4 selector = consumer.foo.selector;
+        fnSignatures[0] = selector;
+
         personaMirror.authorize(id, user, targetConsumer, fnSignatures);
     }
 
     function testAuthorizeConsumerSpecific() public {
         uint256 id = _mintTo(personaOwner);
 
+        // Authorize Alice to impersonate as `id`
+        vm.prank(personaOwner);
         _authorizeConsumerSpecific(id, alice, address(consumer));
 
-        assertEq(
-            uint256(personaMirror.getPermission(id, alice)),
-            uint256(PersonaMirror.PersonaPermission.CONSUMER_SPECIFIC)
-        );
+        // Alice should be authorized to call any function
+        assertTrue(personaMirror.isAuthorized(id, alice, address(consumer), 0xdeadbeef));
 
         // Test that alice can now call consumer's foo() function
         vm.startPrank(alice);
@@ -132,17 +139,16 @@ contract PersonaTest is BaseTest {
 
     function testAuthorizeFunctionSpecific() public {
         uint256 id = _mintTo(personaOwner);
-        bytes4[] memory fnSignatures = new bytes4[](1);
-        bytes4 selector = consumer.foo.selector;
-        fnSignatures[0] = selector;
 
-        _authorizeFunctionSpecific(id, alice, address(consumer), fnSignatures);
+        // Authorize Alice to impersonate as `id`
+        vm.prank(personaOwner);
+        _authorizeFunctionSpecific(id, alice, address(consumer));
 
-        // Test that personaMirror contract stores permissions correctly
-        assertEq(
-            uint256(personaMirror.getPermission(id, alice)),
-            uint256(PersonaMirror.PersonaPermission.FUNCTION_SPECIFIC)
-        );
+        // Alice should be authorized to call foo()
+        assertTrue(personaMirror.isAuthorized(id, alice, address(consumer), consumer.foo.selector));
+
+        // Alice should not be authorized to call any function
+        assertTrue(!personaMirror.isAuthorized(id, alice, address(consumer), 0xdeadbeef));
 
         // Test that alice can now call consumer's foo() function
         vm.startPrank(alice);
@@ -156,125 +162,156 @@ contract PersonaTest is BaseTest {
     function testDeauthorizeConsumerSpecific() public {
         uint256 id = _mintTo(personaOwner);
 
+        // Authorize Alice to impersonate as `id`
+        vm.prank(personaOwner);
         _authorizeConsumerSpecific(id, alice, address(consumer));
 
+        // `personaOwner` deauthorize Alice
         vm.prank(personaOwner);
         personaMirror.deauthorize(id, alice, address(consumer));
 
-        assertEq(uint256(personaMirror.getPermission(id, alice)), uint256(PersonaMirror.PersonaPermission.DENY));
-        assertEq(personaMirror.getActivePersona(alice, address(consumer)), uint256(0));
-        assertTrue(personaMirror.getAuthorization(id, alice, address(consumer)).isAuthorized == false);
-        assertEq(personaMirror.getAuthorization(id, alice, address(consumer)).authorizedFns.length, uint256(0));
+        // Alice should not be authorized for `id` anymore
+        assertTrue(!personaMirror.isAuthorized(id, alice, address(consumer), 0));
+
+        // Alice should not have an active impersonation
+        assertEq(personaMirror.getActivePersona(alice, address(consumer)), 0);
     }
 
     function testDeauthorizeFunctionSpecific() public {
         uint256 id = _mintTo(personaOwner);
-        bytes4[] memory fnSignatures = new bytes4[](1);
-        bytes4 selector = consumer.foo.selector;
-        fnSignatures[0] = selector;
 
-        _authorizeFunctionSpecific(id, alice, address(consumer), fnSignatures);
+        // Authorize Alice to impersonate as `id`
+        vm.prank(personaOwner);
+        _authorizeFunctionSpecific(id, alice, address(consumer));
 
+        // Alice impersonates as `id`
         vm.prank(alice);
         personaMirror.impersonate(id, address(consumer));
 
+        // `personaOwner` deauthorize Alice
         vm.prank(personaOwner);
         personaMirror.deauthorize(id, alice, address(consumer));
 
-        assertEq(uint256(personaMirror.getPermission(id, alice)), uint256(PersonaMirror.PersonaPermission.DENY));
-        assertEq(personaMirror.getActivePersona(alice, address(consumer)), uint256(0));
-        assertTrue(personaMirror.getAuthorization(id, alice, address(consumer)).isAuthorized == false);
+        // Alice should not be authorized for `id` anymore
+        assertTrue(!personaMirror.isAuthorized(id, alice, address(consumer), consumer.foo.selector));
+
+        // Alice should not have an active impersonation
+        assertEq(personaMirror.getActivePersona(alice, address(consumer)), 0);
     }
 
     function testDeauthorizeNoActiveImpersonation() public {
-        uint256 id1 = _mintTo(personaOwner);
-        uint256 id2 = _mintTo(bob);
-        bytes4[] memory fnSignatures = new bytes4[](1);
-        bytes4 selector = consumer.foo.selector;
-        fnSignatures[0] = selector;
+        address personaOwner1 = personaOwner;
+        address personaOwner2 = bob;
+        uint256 id1 = _mintTo(personaOwner1);
+        uint256 id2 = _mintTo(personaOwner2);
 
-        _authorizeFunctionSpecific(id1, alice, address(consumer), fnSignatures);
+        // Give alice authorization to 2 different personas
+        vm.prank(personaOwner1);
+        _authorizeFunctionSpecific(id1, alice, address(consumer));
 
-        vm.prank(bob);
-        personaMirror.authorize(id2, alice, address(consumer), fnSignatures);
+        vm.prank(personaOwner2);
+        _authorizeFunctionSpecific(id2, alice, address(consumer));
 
+        // Alice impersonates `id1`
         vm.prank(alice);
-        personaMirror.impersonate(id2, address(consumer));
+        personaMirror.impersonate(id1, address(consumer));
 
-        vm.prank(personaOwner);
-        personaMirror.deauthorize(id1, alice, address(consumer));
+        // `personaOwner2` deauthorizes Alice
+        vm.prank(personaOwner2);
+        personaMirror.deauthorize(id2, alice, address(consumer));
 
-        assertEq(uint256(personaMirror.getPermission(id1, alice)), uint256(PersonaMirror.PersonaPermission.DENY));
-        assertTrue(personaMirror.getAuthorization(id1, alice, address(consumer)).isAuthorized == false);
+        // Alice should be deauthorized from persona `id1`
+        assertTrue(!personaMirror.isAuthorized(id2, alice, address(consumer), consumer.foo.selector));
 
-        // The impersonation for `id2` should stay active
-        assertEq(personaMirror.getActivePersona(alice, address(consumer)), uint256(id2));
+        // Alice's impersonation for `id1` should stay active
+        assertEq(personaMirror.getActivePersona(alice, address(consumer)), id1);
     }
 
     // Impersonation/Deimpersonation \\
     function testImpersonationAsOwner() public {
         uint256 id = _mintTo(personaOwner);
 
+        // `personaOwner` impersonates as `id`
         vm.prank(personaOwner);
         personaMirror.impersonate(id, address(consumer));
 
-        assertTrue(personaMirror.getActivePersona(personaOwner, address(consumer)) == id);
+        // `personaOwner` should have `id` as active persona
+        assertEq(personaMirror.getActivePersona(personaOwner, address(consumer)), id);
     }
 
     function testImpersonationAsConsumerSpecific() public {
         uint256 id = _mintTo(personaOwner);
 
+        // Give Alice authorization to impersonate `id`
+        vm.prank(personaOwner);
         _authorizeConsumerSpecific(id, alice, address(consumer));
 
+        // Alice impersonates `id`
         vm.prank(alice);
         personaMirror.impersonate(id, address(consumer));
 
-        assertTrue(personaMirror.getActivePersona(address(alice), address(consumer)) == id);
+        // Alice should have `id` as active persona
+        assertEq(personaMirror.getActivePersona(address(alice), address(consumer)), id);
     }
 
     function testImpersonationAsFunctionSpecific() public {
         uint256 id = _mintTo(personaOwner);
-        bytes4[] memory fnSignatures = new bytes4[](1);
-        bytes4 selector = consumer.foo.selector;
-        fnSignatures[0] = selector;
 
-        _authorizeFunctionSpecific(id, alice, address(consumer), fnSignatures);
+        // Give Alice authorization to impersonate `id`
+        vm.prank(personaOwner);
+        _authorizeFunctionSpecific(id, alice, address(consumer));
 
+        // Alice impersonates `id`
         vm.prank(alice);
         personaMirror.impersonate(id, address(consumer));
 
-        assertTrue(personaMirror.getActivePersona(address(alice), address(consumer)) == id);
+        // Alice should have `id` as active persona
+        assertEq(personaMirror.getActivePersona(address(alice), address(consumer)), id);
     }
 
     function testFailImpersonationWithoutPermissions() public {
         uint256 id = _mintTo(personaOwner);
 
+        // Alice should not be able to impersonate `id`
+        vm.prank(alice);
         personaMirror.impersonate(id, address(consumer));
     }
 
     function testDeimpersonation() public {
         uint256 id = _mintTo(personaOwner);
 
+        // Give Alice authorization to impersonate `id`
+        vm.prank(personaOwner);
         _authorizeConsumerSpecific(id, alice, address(consumer));
 
+        // Alice impersonates `id`
         vm.prank(alice);
         personaMirror.impersonate(id, address(consumer));
+
+        // Alice should have `id` as active persona
         assertTrue(personaMirror.getActivePersona(address(alice), address(consumer)) == id);
 
+        // Alice deimpersonates `id`
         vm.prank(alice);
         personaMirror.deimpersonate(address(consumer));
-        assertTrue(personaMirror.getActivePersona(address(alice), address(consumer)) == uint256(0));
+
+        // Alice should not have an active impersonation
+        assertEq(personaMirror.getActivePersona(address(alice), address(consumer)), 0);
     }
 
     // Consumer Integration \\
     function testFailMockConsumerCallDeauthorizeConsumerSpecific() public {
         uint256 id = _mintTo(personaOwner);
 
+        // Give Alice authorization to impersonate `id`
+        vm.prank(personaOwner);
         _authorizeConsumerSpecific(id, alice, address(consumer));
 
+        // Alice impersonates `id`
         vm.prank(alice);
         personaMirror.impersonate(id, address(consumer));
 
+        // `personaOwner` deauthorizes Alice
         vm.prank(personaOwner);
         personaMirror.deauthorize(id, alice, address(consumer));
 
@@ -285,15 +322,16 @@ contract PersonaTest is BaseTest {
 
     function testFailMockConsumerCallDeauthorizeFunctionSpecific() public {
         uint256 id = _mintTo(personaOwner);
-        bytes4[] memory fnSignatures = new bytes4[](1);
-        bytes4 selector = consumer.foo.selector;
-        fnSignatures[0] = selector;
 
-        _authorizeFunctionSpecific(id, alice, address(consumer), fnSignatures);
+        // Give Alice authorization to impersonate `id`
+        vm.prank(personaOwner);
+        _authorizeFunctionSpecific(id, alice, address(consumer));
 
+        // Alice impersonates `id`
         vm.prank(alice);
         personaMirror.impersonate(id, address(consumer));
 
+        // `personaOwner` deauthorizes Alice
         vm.prank(personaOwner);
         personaMirror.deauthorize(id, alice, address(consumer));
 
@@ -305,26 +343,37 @@ contract PersonaTest is BaseTest {
     function testFailConsumerSpecificCallAfterDeimpersonation() public {
         uint256 id = _mintTo(personaOwner);
 
+        // Give Alice authorization to impersonate `id`
+        vm.prank(personaOwner);
         _authorizeConsumerSpecific(id, alice, address(consumer));
 
+        // Alice impersonates `id`
         vm.startPrank(alice);
         personaMirror.impersonate(id, address(consumer));
+
+        // Alice deimpersonates `id`
         personaMirror.deimpersonate(address(consumer));
+
+        // Test impersonation was removed and alice can no longer call consumer's foo() function
         consumer.foo();
         vm.stopPrank();
     }
 
     function testFailFunctionSpecificCallAfterDeimpersonation() public {
         uint256 id = _mintTo(personaOwner);
-        bytes4[] memory fnSignatures = new bytes4[](1);
-        bytes4 selector = consumer.foo.selector;
-        fnSignatures[0] = selector;
 
-        _authorizeFunctionSpecific(id, alice, address(consumer), fnSignatures);
+        // Give Alice authorization to impersonate `id`
+        vm.prank(personaOwner);
+        _authorizeFunctionSpecific(id, alice, address(consumer));
 
+        // Alice impersonates `id`
         vm.startPrank(alice);
         personaMirror.impersonate(id, address(consumer));
+
+        // Alice deimpersonates `id`
         personaMirror.deimpersonate(address(consumer));
+
+        // Test impersonation was removed and alice can no longer call consumer's foo() function
         consumer.foo();
         vm.stopPrank();
     }
@@ -336,39 +385,45 @@ contract PersonaTest is BaseTest {
     function testTransferOwnership() public {
         uint256 id = _mintTo(personaOwner);
 
+        // `personaOwner` transfers persona to Alice
         vm.prank(personaOwner);
-        persona.transferFrom(address(personaOwner), address(alice), id);
+        persona.transferFrom(personaOwner, alice, id);
 
-        assertTrue(personaMirror.ownerOf(id) == address(alice));
+        // Persona Mirror should show Alice as the new owner
+        assertEq(personaMirror.ownerOf(id), alice);
     }
 
     function testTransferRemovesAuthorization() public {
         uint256 id = _mintTo(personaOwner);
 
-        vm.startPrank(personaOwner);
-        personaMirror.authorize(id, personaOwner, address(consumer), new bytes4[](0));
-        persona.transferFrom(personaOwner, address(alice), id);
-        vm.stopPrank();
+        // Give Alice authorization to impersonate `id`
+        vm.prank(personaOwner);
+        _authorizeConsumerSpecific(id, alice, address(consumer));
 
-        assertTrue(personaMirror.getAuthorization(id, personaOwner, address(consumer)).isAuthorized == false);
+        // `personaOwner` transfers persona to Bob
+        vm.prank(personaOwner);
+        persona.transferFrom(personaOwner, address(bob), id);
+
+        // Alice should be deauthorized from persona `id`
+        assertTrue(!personaMirror.isAuthorized(id, alice, address(consumer), bytes4(0)));
     }
 
     function testTransferRemovesImpersonation() public {
         uint256 id = _mintTo(personaOwner);
 
-        vm.startPrank(personaOwner);
+        // Give Alice authorization to impersonate `id`
+        vm.prank(personaOwner);
+        _authorizeConsumerSpecific(id, alice, address(consumer));
+
+        // Alice impersonates `id`
+        vm.startPrank(alice);
         personaMirror.impersonate(id, address(consumer));
-        persona.transferFrom(personaOwner, address(alice), id);
-        vm.stopPrank();
 
-        assertTrue(personaMirror.getActivePersona(personaOwner, address(consumer)) == 0);
+        // `personaOwner` transfers persona to Bob
+        vm.startPrank(personaOwner);
+        persona.transferFrom(personaOwner, bob, id);
+
+        // Alice should not have an active impersonation
+        assertEq(personaMirror.getActivePersona(personaOwner, address(consumer)), 0);
     }
-
-    // Nuke \\
-    // TODO: @namra need to add test for nuke bridging
-
-    // TODO: @namra we need to more aggressively test the nonce system to make sure that it's working correctly
-    // i.e. after a nuke/transfer,
-    //      - user who are previously authorized is no longer authorized
-    //      - user who are previously impersonating is no longer impersonating
 }
