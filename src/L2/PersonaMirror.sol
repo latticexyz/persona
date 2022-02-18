@@ -16,8 +16,8 @@ contract PersonaMirror is BaseRelayRecipient {
     event Authorize(uint256 indexed personaId, address indexed user, address indexed consumer, bytes4[] fnSignatures);
     event Deauthorize(uint256 indexed personaId, address indexed user, address indexed consumer);
 
-    L2CrossDomainMessenger immutable ovmL2CrossDomainMessenger;
-    address immutable personaL1;
+    L2CrossDomainMessenger public immutable ovmL2CrossDomainMessenger;
+    address public immutable personaL1;
 
     address public personaOwner;
 
@@ -57,10 +57,10 @@ contract PersonaMirror is BaseRelayRecipient {
     // user address => consumer contract => active persona
     mapping(address => mapping(address => ActivePersona)) public activePersona;
 
-    constructor(address personaL1ContractAddr, address ovmL2CrossDomainMessengerAddr) {
+    constructor(address _personaL1, address _ovmL2CrossDomainMessenger) {
         personaOwner = msg.sender;
-        personaL1 = personaL1ContractAddr;
-        ovmL2CrossDomainMessenger = L2CrossDomainMessenger(ovmL2CrossDomainMessengerAddr);
+        personaL1 = _personaL1;
+        ovmL2CrossDomainMessenger = L2CrossDomainMessenger(_ovmL2CrossDomainMessenger);
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -173,7 +173,11 @@ contract PersonaMirror is BaseRelayRecipient {
     //////////////////////////////////////////////////////////////*/
 
     function impersonate(uint256 personaId, address consumer) public {
-        require(isAuthorized(personaId, _msgSender(), consumer, bytes4(0)), "NOT_AUTHORIZED");
+        require(
+            _msgSender() == ownerOf[personaId] ||
+                _getPermission(personaId, consumer, _msgSender()) != PersonaPermission.DENY,
+            "NOT_AUTHORIZED"
+        );
         activePersona[_msgSender()][consumer] = ActivePersona(_nonce[personaId], personaId);
 
         emit Impersonate(personaId, _msgSender(), consumer);
