@@ -37,20 +37,21 @@ contract PersonaMirror is BaseRelayRecipient {
         uint256 personaId;
     }
 
-    struct PersonaData {
-        // user => permissions
-        mapping(address => PersonaPermission) permissions;
+    // @dev Data in this struct is "grandfathered"
+    // when nonce is incremented. This can either happen
+    // through bridgeNuke() or bridgeChangeOwner()
+    struct PersonaTransientData {
         // user => consumer => authorization
         mapping(address => mapping(address => PersonaAuthorization)) authorizations;
     }
 
     // persona ID => persona nonce
-    mapping(uint256 => uint256) internal nonce;
+    mapping(uint256 => uint256) internal _nonce;
 
     // persona ID => persona nonce => persona data
-    mapping(uint256 => mapping(uint256 => PersonaData)) internal personaData;
+    mapping(uint256 => mapping(uint256 => PersonaTransientData)) internal _personaTransientData;
 
-    // persona id => owner
+    // persona ID => owner
     mapping(uint256 => address) public ownerOf;
 
     // user address => consumer contract => active persona
@@ -60,66 +61,6 @@ contract PersonaMirror is BaseRelayRecipient {
         personaOwner = msg.sender;
         personaL1 = personaL1ContractAddr;
         ovmL2CrossDomainMessenger = L2CrossDomainMessenger(ovmL2CrossDomainMessengerAddr);
-    }
-
-    /*///////////////////////////////////////////////////////////////
-                            GSN SUPPORT
-    //////////////////////////////////////////////////////////////*/
-
-    function versionRecipient() public pure override returns (string memory) {
-        return "0.0.1";
-    }
-
-    /*///////////////////////////////////////////////////////////////
-                                VIEW
-    //////////////////////////////////////////////////////////////*/
-
-    function getActivePersona(address user, address consumer) public view returns (uint256 personaId) {
-        // if nonce of active person matches current nonce, return persona id
-        // otherwise, then impersonation has expired -> return 0
-        return
-            activePersona[user][consumer].nonce == nonce[activePersona[user][consumer].personaId]
-                ? activePersona[user][consumer].personaId
-                : 0;
-    }
-
-    function getPermission(uint256 personaId, address user) public view returns (PersonaPermission) {
-        return _personaData(personaId).permissions[user];
-    }
-
-    function getAuthorization(
-        uint256 personaId,
-        address user,
-        address consumer
-    ) public view returns (PersonaAuthorization memory) {
-        return _personaData(personaId).authorizations[user][consumer];
-    }
-
-    function isAuthorized(
-        uint256 personaId,
-        address user,
-        address consumer,
-        bytes4 fnSignature
-    ) public view returns (bool) {
-        if (user == ownerOf[personaId]) {
-            return true;
-        } else if (getPermission(personaId, user) == PersonaPermission.DENY) {
-            return false;
-        } else if (getPermission(personaId, user) == PersonaPermission.CONSUMER_SPECIFIC) {
-            return getAuthorization(personaId, user, consumer).isAuthorized;
-        } else if (getPermission(personaId, user) == PersonaPermission.FUNCTION_SPECIFIC) {
-            bytes4[] memory fns = getAuthorization(personaId, user, consumer).authorizedFns;
-            for (uint256 i = 0; i < fns.length; i++) {
-                if (fns[i] == fnSignature) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    function _personaData(uint256 personaId) internal view returns (PersonaData storage) {
-        return personaData[personaId][nonce[personaId]];
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -147,6 +88,74 @@ contract PersonaMirror is BaseRelayRecipient {
     }
 
     /*///////////////////////////////////////////////////////////////
+                            GSN SUPPORT
+    //////////////////////////////////////////////////////////////*/
+
+    function versionRecipient() public pure override returns (string memory) {
+        return "0.0.1";
+    }
+
+    /*///////////////////////////////////////////////////////////////
+                                VIEW
+    //////////////////////////////////////////////////////////////*/
+
+    function _getPersonaTransientData(uint256 personaId) internal view returns (PersonaTransientData storage) {
+        return _personaTransientData[personaId][_nonce[personaId]];
+    }
+
+    function _getAuthorization(
+        uint256 personaId,
+        address user,
+        address consumer
+    ) internal view returns (PersonaAuthorization storage) {
+        return _getPersonaTransientData(personaId).authorizations[user][consumer];
+    }
+
+    function _getPermission(
+        uint256 personaId,
+        address consumer,
+        address user
+    ) internal view returns (PersonaPermission) {
+        PersonaAuthorization storage auth = _getAuthorization(personaId, user, consumer);
+        if (auth.isAuthorized && auth.authorizedFns.length != 0) {
+            return PersonaPermission.FUNCTION_SPECIFIC;
+        } else if (auth.isAuthorized) {
+            return PersonaPermission.CONSUMER_SPECIFIC;
+        } else {
+            return PersonaPermission.DENY;
+        }
+    }
+
+    function getActivePersona(address user, address consumer) public view returns (uint256 personaId) {
+        // if nonce of active person matches current nonce, return persona id
+        // otherwise, then impersonation has expired -> return 0
+        return
+            activePersona[user][consumer].nonce == _nonce[activePersona[user][consumer].personaId]
+                ? activePersona[user][consumer].personaId
+                : 0;
+    }
+
+    function isAuthorized(
+        uint256 personaId,
+        address user,
+        address consumer,
+        bytes4 fnSignature
+    ) public view returns (bool) {
+        if (user == ownerOf[personaId]) {
+            return true;
+        } else if (_getPermission(personaId, consumer, user) == PersonaPermission.CONSUMER_SPECIFIC) {
+            return true;
+        } else if (_getPermission(personaId, consumer, user) == PersonaPermission.FUNCTION_SPECIFIC) {
+            bytes4[] memory fns = _getAuthorization(personaId, user, consumer).authorizedFns;
+            for (uint256 i = 0; i < fns.length; i++) {
+                if (fns[i] == fnSignature) return true;
+            }
+        }
+
+        return false;
+    }
+
+    /*///////////////////////////////////////////////////////////////
                                 ADMIN
     //////////////////////////////////////////////////////////////*/
 
@@ -164,11 +173,8 @@ contract PersonaMirror is BaseRelayRecipient {
     //////////////////////////////////////////////////////////////*/
 
     function impersonate(uint256 personaId, address consumer) public {
-        require(
-            _msgSender() == ownerOf[personaId] || getPermission(personaId, _msgSender()) != PersonaPermission.DENY,
-            "NOT_AUTHORIZED"
-        );
-        activePersona[_msgSender()][consumer] = ActivePersona(nonce[personaId], personaId);
+        require(isAuthorized(personaId, _msgSender(), consumer, bytes4(0)), "NOT_AUTHORIZED");
+        activePersona[_msgSender()][consumer] = ActivePersona(_nonce[personaId], personaId);
 
         emit Impersonate(personaId, _msgSender(), consumer);
     }
@@ -187,10 +193,7 @@ contract PersonaMirror is BaseRelayRecipient {
         address consumer,
         bytes4[] memory fnSignatures
     ) public onlyPersonaOwner(personaId) {
-        _personaData(personaId).permissions[user] = fnSignatures.length == 0
-            ? PersonaPermission.CONSUMER_SPECIFIC
-            : PersonaPermission.FUNCTION_SPECIFIC;
-        _personaData(personaId).authorizations[user][consumer] = PersonaAuthorization(true, fnSignatures);
+        _getPersonaTransientData(personaId).authorizations[user][consumer] = PersonaAuthorization(true, fnSignatures);
 
         emit Authorize(personaId, user, consumer, fnSignatures);
     }
@@ -200,8 +203,7 @@ contract PersonaMirror is BaseRelayRecipient {
         address user,
         address consumer
     ) public onlyPersonaOwner(personaId) {
-        _personaData(personaId).permissions[user] = PersonaPermission.DENY;
-        delete _personaData(personaId).authorizations[user][consumer];
+        delete _getPersonaTransientData(personaId).authorizations[user][consumer];
 
         // We want to force deimpersonate the user only if they
         // are currently impersonating as `personaId`
@@ -217,16 +219,16 @@ contract PersonaMirror is BaseRelayRecipient {
     //////////////////////////////////////////////////////////////*/
 
     function bridgeNuke(uint256 personaId) public onlyL1Persona {
-        nonce[personaId] += 1;
+        _nonce[personaId] += 1;
 
-        emit BridgeNuke(personaId, nonce[personaId]);
+        emit BridgeNuke(personaId, _nonce[personaId]);
     }
 
     function bridgeChangeOwner(address to, uint256 personaId) public onlyL1Persona {
         address from = ownerOf[personaId];
         ownerOf[personaId] = to;
-        nonce[personaId] += 1;
+        _nonce[personaId] += 1;
 
-        emit BridgeChangeOwner(personaId, from, to, nonce[personaId]);
+        emit BridgeChangeOwner(personaId, from, to, _nonce[personaId]);
     }
 }
