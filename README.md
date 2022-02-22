@@ -1,4 +1,6 @@
 # Persona
 Deployment:
-- Gnosis Chain (100): `0x3fe0812d6f8a681c7f862f7c929da3e1323b11ce`
-- Optimism on Gnosis Chain (300): `0xd6d18e6bafd8e32b8bd43af0462a202b3376c01b` 
+- Gnosis Chain (100): `{{{100:l1Address}}}`
+- Optimism on Gnosis Chain (300): `{{{300:l2Address}}}` 
+- Kovan (42): `{{{42:l1Address}}}`
+- Optimism Kovan (69): `{{{69:l2Address}}}` 
