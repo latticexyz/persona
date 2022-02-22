@@ -1,1 +1,1 @@
-forge create SimplePersonaTokenURIGenerator --rpc-url "https://rpc.xdaichain.com" --private-key $1 --force
+forge create SimplePersonaTokenURIGenerator --rpc-url $RPC_URL --private-key $PKEY --force

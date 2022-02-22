@@ -14,10 +14,9 @@
     "release": "release-it",
     "prepare": "git submodule update --init --recursive",
     "// deployment and tasks": "",
-    "deploy": "zx src/deployments/deploy.mjs",
-    "redeploy-l2": "zx src/deployments/redeploy-l2.mjs",
-    "task:mint": "zx src/tasks/mint/mint-tasks.mjs",
-    "task:sanity": "zx src/tasks/sanity/sanity-tasks.mjs",
+    "deploy": "dotenv -- zx src/deployments/deploy.mjs",
+    "task:mint:gc": "dotenv -- zx src/tasks/mint/mint-tasks.mjs 100",
+    "task:mint:kovan": "dotenv -- zx src/tasks/mint/mint-tasks.mjs 42",
     "// subgraphs": "",
     "foundry:build": "forge build --force && cp out/Persona.sol/Persona.json abi/ && cp out/PersonaMirror.sol/PersonaMirror.json abi/",
     "graph:export-abi": "yarn foundry:build && cp out/Persona.sol/Persona.json subgraphs/L1/abis/ && cp out/PersonaMirror.sol/PersonaMirror.json subgraphs/L2/abis/",
@@ -25,11 +24,13 @@
     "graph:build:subgraph": "graph build subgraphs/L1/subgraph.yaml -o subgraph-build/L1 && graph build subgraphs/L2/subgraph.yaml -o subgraph-build/L2",
     "graph:build": "yarn graph:export-abi && yarn graph:codegen && yarn graph:build:subgraph",
     "// L1": "",
-    "graph:l1:deploy": "graph deploy --node https://api.thegraph.com/deploy/ latticexyz/persona-l1 subgraphs/L1/subgraph.yaml",
+    "graph:deploy:gc": "graph deploy --node https://api.thegraph.com/deploy/ latticexyz/persona-l1 subgraphs/L1/subgraph.yaml",
+    "graph:deploy:kovan": "graph deploy --node https://api.thegraph.com/deploy/ latticexyz/persona-l1-kovan subgraphs/L1/subgraph-kovan.yaml",
     "// L2": "",
-    "graph:l2:create": "graph create --node https://admin-graph.lattice.xyz/ latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
-    "graph:l2:remove": "graph remove --node https://admin-graph.lattice.xyz/ latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
-    "graph:l2:deploy": "graph deploy --node https://admin-graph.lattice.xyz/ --ipfs https://ipfs-graph.lattice.xyz latticexyz/persona-l2 subgraphs/L2/subgraph.yaml"
+    "graph:create:oegc": "graph create --node https://admin-graph.lattice.xyz/ latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
+    "graph:remove:oegc": "graph remove --node https://admin-graph.lattice.xyz/ latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
+    "graph:deploy:oegc": "graph deploy --node https://admin-graph.lattice.xyz/ --ipfs https://ipfs-graph.lattice.xyz latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
+    "graph:deploy:oekovan": "graph deploy --node https://api.thegraph.com/deploy/ latticexyz/persona-l2-kovan subgraphs/L2/subgraph-kovan.yaml"
   },
   "repository": {
     "type": "git",
@@ -45,6 +46,7 @@
     "@graphprotocol/graph-cli": "^0.26.0",
     "@graphprotocol/graph-ts": "^0.24.1",
     "@types/node": "^12.0.0",
+    "dotenv-cli": "^5.0.0",
     "release-it": "^14.12.4",
     "zx": "^5.0.0"
   }
