@@ -99,7 +99,7 @@ fs.writeFileSync('deployment.json', JSON.stringify(deployments))
 let README = fs.readFileSync('README.template.md',
 {encoding:'utf8', flag:'r'});
 
-for(const [L1, L2] in L1_L2_PAIR) {
+for(const [L1, L2] of L1_L2_PAIR) {
   README = README.replace(`{{{${L1}:l1Address}}}`, deployments[L1])
   README = README.replace(`{{{${L2}:l2Address}}}`, deployments[L2])
 }
