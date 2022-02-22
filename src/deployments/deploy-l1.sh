@@ -1,1 +1,1 @@
-forge create Persona --constructor-args "$1" "$2" "$3" "$4" --rpc-url "https://rpc.xdaichain.com" --private-key $5 --force
+forge create Persona --constructor-args "$1" "$2" "$3" "$4" --rpc-url $RPC_URL --private-key $PKEY --force
