@@ -1,1 +1,1 @@
-cast send $1 "setMinter(address, bool)" "$2" "true" --rpc-url "https://rpc.xdaichain.com" --private-key $3
+cast send $1 "setMinter(address, bool)" "$2" "true" --rpc-url $RPC_URL --private-key $PKEY
