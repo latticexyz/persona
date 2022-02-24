@@ -5,3 +5,4 @@ subgraphs/**/generated/
 subgraph-build/
 build/
 .DS_Store
+.env
