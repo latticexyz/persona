@@ -27,9 +27,9 @@
     "graph:deploy:gc": "graph deploy --node https://api.thegraph.com/deploy/ latticexyz/persona-l1 subgraphs/L1/subgraph.yaml",
     "graph:deploy:kovan": "graph deploy --node https://api.thegraph.com/deploy/ latticexyz/persona-l1-kovan subgraphs/L1/subgraph-kovan.yaml",
     "// L2": "",
-    "graph:create:oegc": "graph create --node https://admin-graph.lattice.xyz/ latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
-    "graph:remove:oegc": "graph remove --node https://admin-graph.lattice.xyz/ latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
-    "graph:deploy:oegc": "graph deploy --node https://admin-graph.lattice.xyz/ --ipfs https://ipfs-graph.lattice.xyz latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
+    "graph:create:oegc": "graph create --node https://admin-graph-optimism.gnosischain.com/ latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
+    "graph:remove:oegc": "graph remove --node https://admin-graph-optimism.gnosischain.com/ latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
+    "graph:deploy:oegc": "graph deploy --node https://admin-graph-optimism.gnosischain.com/ --ipfs https://ipfs-graph-optimism.gnosischain.com/ latticexyz/persona-l2 subgraphs/L2/subgraph.yaml",
     "graph:deploy:oekovan": "graph deploy --node https://api.thegraph.com/deploy/ latticexyz/persona-l2-kovan subgraphs/L2/subgraph-kovan.yaml"
   },
   "repository": {
