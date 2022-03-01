@@ -119,12 +119,23 @@ function generateImpersonationId(personaId: string, user: string, consumer: stri
   return personaId.concat(":".concat(user.concat(":".concat(consumer))))
 }
 
+function generateAuthorizationId(personaId: string, user: string, consumer: string) : string {
+  return personaId.concat(":".concat(user.concat(":".concat(consumer))))
+}
+
 export function handleImpersonate(event: Impersonate): void {
   log.debug("Impersonate detected. Persona ID: {} | User: {} | Consumer: {}", [
     event.params.personaId.toString(),
     event.params.user.toHexString(),
     event.params.consumer.toHexString()
   ]);
+
+  let user = User.load(event.params.user.toHexString());
+
+  if(!user) {
+    user = new User(event.params.user.toHexString());
+    user.save();
+  }
 
   let impersonationId = generateImpersonationId(event.params.personaId.toString(), event.params.user.toHexString(), event.params.consumer.toHexString());
   let impersonation = Impersonation.load(impersonationId);
@@ -163,12 +174,15 @@ export function handleAuthorize(event: Authorize): void {
     event.params.fnSignatures.toString()
   ]);
 
-  let user = User.load(event.params.user.toHexString())!;
-  let persona = Persona.load(event.params.personaId.toString())!;
+  let user = User.load(event.params.user.toHexString());
 
-  let authorizationId = event.transaction.hash
-    .toHexString()
-    .concat(":".concat(event.transactionLogIndex.toHexString()));
+  if(!user) {
+    user = new User(event.params.user.toHexString());
+    user.save();
+  }
+
+
+  let authorizationId = generateAuthorizationId(event.params.personaId.toString(), event.params.user.toHexString(), event.params.consumer.toHexString());
   let authorization = Authorization.load(authorizationId);
 
   if (authorization == null) {
@@ -177,22 +191,10 @@ export function handleAuthorize(event: Authorize): void {
     authorization.user = event.params.user.toHexString();
     authorization.consumer = event.params.consumer.toHexString();
     authorization.fnSignatures = event.params.fnSignatures.map<string>((x: Bytes) => x.toHexString());
+    authorization.permission = authorization.fnSignatures.length > 0 ? "FUNCTION_SPECIFIC" : "CONSUMER_SPECIFIC" 
   }
 
-  if (user.authorizations == null) {
-    user.authorizations = [authorizationId];
-  } else {
-    user.authorizations.push(authorizationId);
-  }
-
-  if (persona.authorizations == null) {
-    persona.authorizations = [authorizationId];
-  } else {
-    persona.authorizations.push(authorizationId);
-  }
-
-  user.save();
-  persona.save();
+  authorization.save();
 }
 
 export function handleDeauthorize(event: Deauthorize): void {
@@ -202,45 +204,30 @@ export function handleDeauthorize(event: Deauthorize): void {
     event.params.consumer.toHexString()
   ]);
 
-  let user = User.load(event.params.user.toHexString())!;
-  let persona = Persona.load(event.params.personaId.toString())!;
+  let authorizationId = generateAuthorizationId(event.params.personaId.toString(), event.params.user.toHexString(), event.params.consumer.toHexString());
 
-  for (let i = 0; i < persona.authorizations.length; i++) {
-    let authorization = Authorization.load(persona.authorizations[i])!;
+  let user = User.load(event.params.user.toHexString());
 
-    if (
-      authorization.user == event.params.user.toHexString() &&
-      authorization.consumer == event.params.consumer.toHexString()
-    ) {
-      persona.authorizations.splice(i, 1);
-      break;
-    }
+  if(!user) {
+    user = new User(event.params.user.toHexString());
+    user.save();
   }
 
   for (let i = 0; i < user.impersonations.length; i++) {
     let impersonation = Impersonation.load(user.impersonations[i])!;
-
     if (
       impersonation.user == event.params.user.toHexString() &&
       impersonation.consumer == event.params.consumer.toHexString()
     ) {
-      user.impersonations.splice(i, 1);
+      store.remove("Impersonation", user.impersonations[i]);
       break;
     }
   }
 
-  for (let i = 0; i < persona.impersonations.length; i++) {
-    let impersonation = Impersonation.load(persona.impersonations[i])!;
-
-    if (
-      impersonation.user == event.params.user.toHexString() &&
-      impersonation.consumer == event.params.consumer.toHexString()
-    ) {
-      persona.impersonations.splice(i, 1);
-      break;
-    }
+  let authorization = Authorization.load(authorizationId);
+  if(authorization) {
+    store.remove("Authorization", authorizationId)
+  } else {
+    log.warning("A deauthorize on an unexisting Authorization entity has been triggered: {}", [authorizationId])
   }
-
-  user.save();
-  persona.save();
 }
