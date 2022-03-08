@@ -2,7 +2,8 @@
 pragma solidity ^0.8.10;
 
 import {ERC721} from "solmate/tokens/ERC721.sol";
-import {BaseRelayRecipient} from "gsn/BaseRelayRecipient.sol";
+import {BasePaymaster} from "gsn/BasePaymaster.sol";
+import {EIP2981RoyaltyOverrideCore} from "royalty-registry/overrides/RoyaltyOverrideCore.sol";
 
 interface L1CrossDomainMessenger {
     function sendMessage(
@@ -27,12 +28,12 @@ interface ERC721TokenReceiver {
     ) external returns (bytes4);
 }
 
-contract Persona is ERC721, BaseRelayRecipient {
+contract Persona is ERC721, BasePaymaster, EIP2981RoyaltyOverrideCore {
     event NewPersonaTokenURIGenerator(address indexed generator);
 
     L1CrossDomainMessenger public immutable ovmL1CrossDomainMessenger;
 
-    address public contractOwner;
+    address public owner;
     address public personaMirrorL2;
     uint256 public currentPersonaId;
 
@@ -48,7 +49,7 @@ contract Persona is ERC721, BaseRelayRecipient {
         address personaTokenURIGeneratorAddr
     ) ERC721(name, symbol) {
         currentPersonaId = 1;
-        contractOwner = msg.sender;
+        owner = msg.sender;
         ovmL1CrossDomainMessenger = L1CrossDomainMessenger(ovmL1CrossDomainMessengerAddr);
         personaTokenURIGenerator = PersonaTokenURIGenerator(personaTokenURIGeneratorAddr);
     }
@@ -63,7 +64,7 @@ contract Persona is ERC721, BaseRelayRecipient {
     }
 
     modifier onlyContractOwner() {
-        require(_msgSender() == contractOwner, "ONLY_CONTRACT_OWNER");
+        require(_msgSender() == owner, "ONLY_CONTRACT_OWNER");
         _;
     }
 
@@ -78,6 +79,28 @@ contract Persona is ERC721, BaseRelayRecipient {
 
     function versionRecipient() public pure override returns (string memory) {
         return "0.0.1";
+    }
+
+    /*///////////////////////////////////////////////////////////////
+                      ROYALTY REGISTRY SUPPORT
+    //////////////////////////////////////////////////////////////*/
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721, EIP2981RoyaltyOverrideCore)
+        returns (bool)
+    {
+        return ERC721.supportsInterface(interfaceId) || EIP2981RoyaltyOverrideCore.supportsInterface(interfaceId);
+    }
+
+    function setTokenRoyalties(TokenRoyaltyConfig[] calldata royaltyConfigs) external override onlyContractOwner {
+        _setTokenRoyalties(royaltyConfigs);
+    }
+
+    function setDefaultRoyalty(TokenRoyalty calldata royalty) external override onlyContractOwner {
+        _setDefaultRoyalty(royalty);
     }
 
     /*///////////////////////////////////////////////////////////////

@@ -2,13 +2,13 @@
 pragma solidity ^0.8.10;
 
 import {Base64} from "base64/base64.sol";
-import {BaseRelayRecipient} from "gsn/BaseRelayRecipient.sol";
+import {BasePaymaster} from "gsn/BasePaymaster.sol";
 
 interface L2CrossDomainMessenger {
     function xDomainMessageSender() external view returns (address);
 }
 
-contract PersonaMirror is BaseRelayRecipient {
+contract PersonaMirror is BasePaymaster {
     event BridgeNuke(uint256 indexed personaId, uint256 nonce);
     event BridgeChangeOwner(uint256 indexed personaId, address indexed from, address indexed to, uint256 nonce);
     event Impersonate(uint256 indexed personaId, address indexed user, address indexed consumer);
