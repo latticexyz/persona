@@ -6,7 +6,7 @@ schema:
 dataSources:
   - kind: ethereum
     name: PersonaMirror
-    network: mainnet # GC people not naming things properly
+    network: optimism
     source:
       address: "0xd6d18e6bafd8e32b8bd43af0462a202b3376c01b"
       abi: PersonaMirror
