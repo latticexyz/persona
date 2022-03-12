@@ -61,11 +61,11 @@ export function handleChangeOwner(event: BridgeChangeOwner): void {
         const impersonationId = user.impersonations[i];
         const impersonation = Impersonation.load(impersonationId)!;
         if (impersonation.persona == persona.id) {
-          store.remove("Impersonation", impersonationId)
+          store.remove("Impersonation", impersonationId);
           break;
         }
       }
-      store.remove("Authorization", authorizationId)
+      store.remove("Authorization", authorizationId);
     }
   }
 
@@ -105,22 +105,22 @@ export function handleNuke(event: BridgeNuke): void {
       const impersonationId = user.impersonations[i];
       const impersonation = Impersonation.load(impersonationId)!;
       if (impersonation.persona == persona.id) {
-        store.remove("Impersonation", impersonationId)
+        store.remove("Impersonation", impersonationId);
         break;
       }
     }
-    store.remove("Authorization", authorizationId)
+    store.remove("Authorization", authorizationId);
   }
 
   persona.save();
 }
 
-function generateImpersonationId(personaId: string, user: string, consumer: string) : string {
-  return personaId.concat(":".concat(user.concat(":".concat(consumer))))
+function generateImpersonationId(personaId: string, user: string, consumer: string): string {
+  return personaId.concat(":".concat(user.concat(":".concat(consumer))));
 }
 
-function generateAuthorizationId(personaId: string, user: string, consumer: string) : string {
-  return personaId.concat(":".concat(user.concat(":".concat(consumer))))
+function generateAuthorizationId(personaId: string, user: string, consumer: string): string {
+  return personaId.concat(":".concat(user.concat(":".concat(consumer))));
 }
 
 export function handleImpersonate(event: Impersonate): void {
@@ -132,12 +132,16 @@ export function handleImpersonate(event: Impersonate): void {
 
   let user = User.load(event.params.user.toHexString());
 
-  if(!user) {
+  if (!user) {
     user = new User(event.params.user.toHexString());
     user.save();
   }
 
-  let impersonationId = generateImpersonationId(event.params.personaId.toString(), event.params.user.toHexString(), event.params.consumer.toHexString());
+  let impersonationId = generateImpersonationId(
+    event.params.personaId.toString(),
+    event.params.user.toHexString(),
+    event.params.consumer.toHexString()
+  );
   let impersonation = Impersonation.load(impersonationId);
 
   if (impersonation == null) {
@@ -157,12 +161,18 @@ export function handleDeimpersonate(event: Deimpersonate): void {
     event.params.consumer.toHexString()
   ]);
 
-  let impersonationId = generateImpersonationId(event.params.personaId.toString(), event.params.user.toHexString(), event.params.consumer.toHexString());
+  let impersonationId = generateImpersonationId(
+    event.params.personaId.toString(),
+    event.params.user.toHexString(),
+    event.params.consumer.toHexString()
+  );
   let impersonation = Impersonation.load(impersonationId);
-  if(impersonation) {
-    store.remove("Impersonation", impersonationId)
+  if (impersonation) {
+    store.remove("Impersonation", impersonationId);
   } else {
-    log.warning("A deimpersonate on an unexisting Impersonation entity has been triggered: {}", [impersonationId])
+    log.warning("A deimpersonate on an unexisting Impersonation entity has been triggered: {}", [
+      impersonationId
+    ]);
   }
 }
 
@@ -176,13 +186,16 @@ export function handleAuthorize(event: Authorize): void {
 
   let user = User.load(event.params.user.toHexString());
 
-  if(!user) {
+  if (!user) {
     user = new User(event.params.user.toHexString());
     user.save();
   }
 
-
-  let authorizationId = generateAuthorizationId(event.params.personaId.toString(), event.params.user.toHexString(), event.params.consumer.toHexString());
+  let authorizationId = generateAuthorizationId(
+    event.params.personaId.toString(),
+    event.params.user.toHexString(),
+    event.params.consumer.toHexString()
+  );
   let authorization = Authorization.load(authorizationId);
 
   if (authorization == null) {
@@ -190,8 +203,11 @@ export function handleAuthorize(event: Authorize): void {
     authorization.persona = event.params.personaId.toString();
     authorization.user = event.params.user.toHexString();
     authorization.consumer = event.params.consumer.toHexString();
-    authorization.fnSignatures = event.params.fnSignatures.map<string>((x: Bytes) => x.toHexString());
-    authorization.permission = authorization.fnSignatures.length > 0 ? "FUNCTION_SPECIFIC" : "CONSUMER_SPECIFIC" 
+    authorization.fnSignatures = event.params.fnSignatures.map<string>((x: Bytes) =>
+      x.toHexString()
+    );
+    authorization.permission =
+      authorization.fnSignatures.length > 0 ? "FUNCTION_SPECIFIC" : "CONSUMER_SPECIFIC";
   }
 
   authorization.save();
@@ -204,11 +220,15 @@ export function handleDeauthorize(event: Deauthorize): void {
     event.params.consumer.toHexString()
   ]);
 
-  let authorizationId = generateAuthorizationId(event.params.personaId.toString(), event.params.user.toHexString(), event.params.consumer.toHexString());
+  let authorizationId = generateAuthorizationId(
+    event.params.personaId.toString(),
+    event.params.user.toHexString(),
+    event.params.consumer.toHexString()
+  );
 
   let user = User.load(event.params.user.toHexString());
 
-  if(!user) {
+  if (!user) {
     user = new User(event.params.user.toHexString());
     user.save();
   }
@@ -225,9 +245,11 @@ export function handleDeauthorize(event: Deauthorize): void {
   }
 
   let authorization = Authorization.load(authorizationId);
-  if(authorization) {
-    store.remove("Authorization", authorizationId)
+  if (authorization) {
+    store.remove("Authorization", authorizationId);
   } else {
-    log.warning("A deauthorize on an unexisting Authorization entity has been triggered: {}", [authorizationId])
+    log.warning("A deauthorize on an unexisting Authorization entity has been triggered: {}", [
+      authorizationId
+    ]);
   }
 }
