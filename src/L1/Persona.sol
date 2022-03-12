@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {ERC721} from "solmate/tokens/ERC721.sol";
-import {BasePaymaster} from "gsn/BasePaymaster.sol";
+import {BaseRelayRecipient} from "gsn/BaseRelayRecipient.sol";
 import {EIP2981RoyaltyOverrideCore} from "royalty-registry/overrides/RoyaltyOverrideCore.sol";
 
 interface L1CrossDomainMessenger {
@@ -28,7 +28,7 @@ interface ERC721TokenReceiver {
     ) external returns (bytes4);
 }
 
-contract Persona is ERC721, BasePaymaster, EIP2981RoyaltyOverrideCore {
+contract Persona is ERC721, BaseRelayRecipient, EIP2981RoyaltyOverrideCore {
     event NewPersonaTokenURIGenerator(address indexed generator);
 
     L1CrossDomainMessenger public immutable ovmL1CrossDomainMessenger;
@@ -123,7 +123,7 @@ contract Persona is ERC721, BasePaymaster, EIP2981RoyaltyOverrideCore {
 
     function setOwner(address newContractOwner) public onlyContractOwner {
         require(newContractOwner != address(0), "ZERO_ADDR");
-        contractOwner = newContractOwner;
+        owner = newContractOwner;
     }
 
     function setPersonaMirrorL2(address personaMirrorAddr) public onlyContractOwner {
@@ -173,13 +173,13 @@ contract Persona is ERC721, BasePaymaster, EIP2981RoyaltyOverrideCore {
     }
 
     function approve(address spender, uint256 id) public override {
-        address owner = ownerOf[id];
+        address _owner = ownerOf[id];
 
-        require(_msgSender() == owner || isApprovedForAll[owner][_msgSender()], "NOT_AUTHORIZED");
+        require(_msgSender() == _owner || isApprovedForAll[_owner][_msgSender()], "NOT_AUTHORIZED");
 
         getApproved[id] = spender;
 
-        emit Approval(owner, spender, id);
+        emit Approval(_owner, spender, id);
     }
 
     function setApprovalForAll(address operator, bool approved) public override {

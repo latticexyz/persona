@@ -42,7 +42,7 @@ contract PersonaTest is BaseTest {
         vm.prank(deployer);
         persona.setOwner(alice);
 
-        assertEq(persona.contractOwner(), alice);
+        assertEq(persona.owner(), alice);
     }
 
     function testSetTokenURIGenerator() public {
