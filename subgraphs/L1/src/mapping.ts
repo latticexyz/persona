@@ -2,7 +2,7 @@ import { log, BigInt } from "@graphprotocol/graph-ts";
 import {
   NewPersonaTokenURIGenerator,
   Persona as PersonaContract,
-  Transfer as TransferEvent
+  Transfer as TransferEvent,
 } from "../generated/Persona/Persona";
 import { Persona, Owner, Transfer } from "../generated/schema";
 
@@ -10,7 +10,7 @@ export function handleTransfer(event: TransferEvent): void {
   log.info("Transfer detected. From: {} | To: {} | TokenID: {}", [
     event.params.from.toHexString(),
     event.params.to.toHexString(),
-    event.params.id.toString()
+    event.params.id.toString(),
   ]);
 
   let previousOwner = Owner.load(event.params.from.toHexString());
@@ -79,7 +79,7 @@ export function handleTransfer(event: TransferEvent): void {
 
 export function handleNewPersonaTokenURIGenerator(event: NewPersonaTokenURIGenerator): void {
   log.info("New persona Token URI generator detected. Token URI Generator: {}", [
-    event.params.generator.toHexString()
+    event.params.generator.toHexString(),
   ]);
 
   let instance = PersonaContract.bind(event.address);

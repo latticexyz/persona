@@ -39,7 +39,6 @@ contract SimplePersonaTokenURIGenerator is PersonaTokenURIGenerator {
         return string(buffer);
     }
 
-
     function generateTokenURI(uint256 personaId, address owner) external view returns (string memory) {
         string memory idString = _toString(personaId);
 
@@ -50,7 +49,8 @@ contract SimplePersonaTokenURIGenerator is PersonaTokenURIGenerator {
                     idString,
                     unicode'", "description": "Personas embody the identity of players on the Lattice Protocol.\\n\\nView this NFT at [https://lattice.xyz/persona/',
                     idString,
-                    '](https://lattice.xyz/persona/',idString,
+                    "](https://lattice.xyz/persona/",
+                    idString,
                     ')"}'
                 )
             );

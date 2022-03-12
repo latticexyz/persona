@@ -5,7 +5,7 @@ import {
   Impersonate,
   Deimpersonate,
   Authorize,
-  Deauthorize
+  Deauthorize,
 } from "../generated/PersonaMirror/PersonaMirror";
 import { Persona, User, Transfer, Authorization, Impersonation } from "../generated/schema";
 
@@ -14,7 +14,7 @@ export function handleChangeOwner(event: BridgeChangeOwner): void {
     event.params.personaId.toString(),
     event.params.from.toHexString(),
     event.params.to.toHexString(),
-    event.params.nonce.toString()
+    event.params.nonce.toString(),
   ]);
 
   let persona = Persona.load(event.params.personaId.toString());
@@ -91,7 +91,7 @@ export function handleChangeOwner(event: BridgeChangeOwner): void {
 export function handleNuke(event: BridgeNuke): void {
   log.debug("BridgeNuke detected. Persona ID: {} | Nonce: {}", [
     event.params.personaId.toString(),
-    event.params.nonce.toString()
+    event.params.nonce.toString(),
   ]);
 
   let persona = Persona.load(event.params.personaId.toString())!;
@@ -127,7 +127,7 @@ export function handleImpersonate(event: Impersonate): void {
   log.debug("Impersonate detected. Persona ID: {} | User: {} | Consumer: {}", [
     event.params.personaId.toString(),
     event.params.user.toHexString(),
-    event.params.consumer.toHexString()
+    event.params.consumer.toHexString(),
   ]);
 
   let user = User.load(event.params.user.toHexString());
@@ -158,7 +158,7 @@ export function handleDeimpersonate(event: Deimpersonate): void {
   log.debug("Impersonate detected. Persona ID: {} | User: {} | Consumer: {}", [
     event.params.personaId.toString(),
     event.params.user.toHexString(),
-    event.params.consumer.toHexString()
+    event.params.consumer.toHexString(),
   ]);
 
   let impersonationId = generateImpersonationId(
@@ -171,7 +171,7 @@ export function handleDeimpersonate(event: Deimpersonate): void {
     store.remove("Impersonation", impersonationId);
   } else {
     log.warning("A deimpersonate on an unexisting Impersonation entity has been triggered: {}", [
-      impersonationId
+      impersonationId,
     ]);
   }
 }
@@ -181,7 +181,7 @@ export function handleAuthorize(event: Authorize): void {
     event.params.personaId.toString(),
     event.params.user.toHexString(),
     event.params.consumer.toHexString(),
-    event.params.fnSignatures.toString()
+    event.params.fnSignatures.toString(),
   ]);
 
   let user = User.load(event.params.user.toHexString());
@@ -217,7 +217,7 @@ export function handleDeauthorize(event: Deauthorize): void {
   log.debug("Deauthorize detected. Persona ID: {} | User: {} | Consumer: {}", [
     event.params.personaId.toString(),
     event.params.user.toHexString(),
-    event.params.consumer.toHexString()
+    event.params.consumer.toHexString(),
   ]);
 
   let authorizationId = generateAuthorizationId(
@@ -249,7 +249,7 @@ export function handleDeauthorize(event: Deauthorize): void {
     store.remove("Authorization", authorizationId);
   } else {
     log.warning("A deauthorize on an unexisting Authorization entity has been triggered: {}", [
-      authorizationId
+      authorizationId,
     ]);
   }
 }
