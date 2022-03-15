@@ -18,7 +18,7 @@
     "task:mint:gc": "dotenv -- zx src/tasks/mint/mint-tasks.mjs 100",
     "task:mint:kovan": "dotenv -- zx src/tasks/mint/mint-tasks.mjs 42",
     "// subgraphs": "",
-    "foundry:build": "forge build --force && cp out/Persona.sol/Persona.json abi/ && cp out/PersonaMirror.sol/PersonaMirror.json abi/",
+    "foundry:build": "forge build --force && cp out/Persona.sol/Persona.json abi/ && cp out/PersonaMirror.sol/PersonaMirror.json abi/ && cp out/MockL2Bridge.sol/MockL2Bridge.json abi/ && cp out/PersonaAllMinter.sol/PersonaAllMinter.json abi/",
     "graph:export-abi": "yarn foundry:build && cp out/Persona.sol/Persona.json subgraphs/L1/abis/ && cp out/PersonaMirror.sol/PersonaMirror.json subgraphs/L2/abis/",
     "graph:codegen": "yarn graph:export-abi && graph codegen subgraphs/L1/subgraph.yaml -o subgraphs/L1/generated && graph codegen subgraphs/L2/subgraph.yaml -o subgraphs/L2/generated",
     "graph:build:subgraph": "graph build subgraphs/L1/subgraph.yaml -o subgraph-build/L1 && graph build subgraphs/L2/subgraph.yaml -o subgraph-build/L2",
