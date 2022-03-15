@@ -8,7 +8,7 @@ dataSources:
     name: PersonaMirror
     network: optimism-kovan
     source:
-      address: "0x61379ea59b82c6b39dbaf0c60db6abcc63fb80d8"
+      address: "0x424a7b9070d17bf4a3f88a648803ba66ca4dec6b"
       abi: PersonaMirror
       startBlock: 1232421
     mapping:

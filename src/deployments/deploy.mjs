@@ -45,8 +45,7 @@ let deployments = {
   personaMirror: {}
 }
 
-// const L1_L2_PAIR = [[100, 300], [42, 69]]
-const L1_L2_PAIR = [[42, 69]]
+const L1_L2_PAIR = [[100, 300], [42, 69]]
 
 for(const [L1, L2] of L1_L2_PAIR.values()) {
 
@@ -64,8 +63,8 @@ for(const [L1, L2] of L1_L2_PAIR.values()) {
   console.log("Using RPC (l1): " + RPC_L1)
   console.log("Using RPC (l2): " + RPC_L2)
 
-  const NAME = "Channel"
-  const SYMBOL = "LTX-CHANNEL"
+  const NAME = "Persona"
+  const SYMBOL = "LTX-PERSONA"
   process.env.PKEY = PRIVATE_KEY
 
   const L1_BRIDGE = L1_BRIDGES[L1];
@@ -100,7 +99,7 @@ let README = fs.readFileSync('README.template.md',
 {encoding:'utf8', flag:'r'});
 
 for(const [L1, L2] of L1_L2_PAIR) {
-  README = README.replace(`{{{${L1}:l1Address}}}`, deployments[L1])
-  README = README.replace(`{{{${L2}:l2Address}}}`, deployments[L2])
+  README = README.replace(`{{{${L1}:l1Address}}}`, deployments["persona"][L1])
+  README = README.replace(`{{{${L2}:l2Address}}}`, deployments["personaMirror"][L2])
 }
 fs.writeFileSync('README.md', README)

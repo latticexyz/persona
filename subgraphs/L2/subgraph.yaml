@@ -8,7 +8,7 @@ dataSources:
     name: PersonaMirror
     network: optimism
     source:
-      address: "0xd6d18e6bafd8e32b8bd43af0462a202b3376c01b"
+      address: "0xf6e8240f65e5438c211141594e3f89fac6140d67"
       abi: PersonaMirror
       startBlock: 733
     mapping:

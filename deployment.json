@@ -1,10 +1,10 @@
 {
   "persona": {
-    "42": "0x08e7a175f032e63ef08cdf0f5e3038430500b8ed",
-    "100": "0x3fe0812d6f8a681c7f862f7c929da3e1323b11ce"
+    "42": "0xbe4d1737f924081644efd90e99bccfb9547a081a",
+    "100": "0xa2a9df8aec7b12790b4d044cd9502cc2168ff975"
   },
   "personaMirror": {
-    "69": "0x61379ea59b82c6b39dbaf0c60db6abcc63fb80d8",
-    "300": "0xd6d18e6bafd8e32b8bd43af0462a202b3376c01b"
+    "69": "0x424a7b9070d17bf4a3f88a648803ba66ca4dec6b",
+    "300": "0xf6e8240f65e5438c211141594e3f89fac6140d67"
   }
 }
