@@ -2,12 +2,14 @@ pragma solidity ^0.8.10;
 
 interface PersonaLike {
     function mint(address to) external;
+
+    function personaMirrorL2() external view returns (address);
 }
 
 contract PersonaAllMinter {
     PersonaLike public personaContract;
 
-    constructor(address personaContractAddress) {
+    function setPersona(address personaContractAddress) public {
         personaContract = PersonaLike(personaContractAddress);
     }
 
