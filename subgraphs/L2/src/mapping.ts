@@ -52,21 +52,21 @@ export function handleChangeOwner(event: BridgeChangeOwner): void {
   } else {
     persona.owner = event.params.to.toHexString();
 
-    for (let i = 0; i < persona.authorizations.length; i++) {
-      const authorizationId = persona.authorizations[i];
-      const authorization = Authorization.load(authorizationId)!;
-      const user = User.load(authorization.user)!;
-      // if user is currently impersonating this persona, remove it
-      for (let j = 0; j < user.impersonations.length; j++) {
-        const impersonationId = user.impersonations[i];
-        const impersonation = Impersonation.load(impersonationId)!;
-        if (impersonation.persona == persona.id) {
-          store.remove("Impersonation", impersonationId);
-          break;
-        }
-      }
-      store.remove("Authorization", authorizationId);
-    }
+    // for (let i = 0; i < persona.authorizations.length; i++) {
+    //   const authorizationId = persona.authorizations[i];
+    //   const authorization = Authorization.load(authorizationId)!;
+    //   const user = User.load(authorization.user)!;
+    //   // if user is currently impersonating this persona, remove it
+    //   for (let j = 0; j < user.impersonations.length; j++) {
+    //     const impersonationId = user.impersonations[i];
+    //     const impersonation = Impersonation.load(impersonationId)!;
+    //     if (impersonation.persona == persona.id) {
+    //       store.remove("Impersonation", impersonationId);
+    //       break;
+    //     }
+    //   }
+    //   store.remove("Authorization", authorizationId);
+    // }
   }
 
   if (transfer == null) {
