@@ -397,12 +397,14 @@ contract PersonaTest is BaseTest {
         uint256 id = _mintTo(personaOwner);
 
         // Give Alice authorization to impersonate `id`
-        vm.prank(personaOwner);
+        vm.startPrank(personaOwner);
         _authorizeConsumerSpecific(id, alice, address(consumer));
+        vm.stopPrank();
 
         // `personaOwner` transfers persona to Bob
-        vm.prank(personaOwner);
+        vm.startPrank(personaOwner);
         persona.transferFrom(personaOwner, address(bob), id);
+        vm.stopPrank();
 
         // Alice should be deauthorized from persona `id`
         assertTrue(!personaMirror.isAuthorized(id, alice, address(consumer), bytes4(0)));
@@ -412,16 +414,19 @@ contract PersonaTest is BaseTest {
         uint256 id = _mintTo(personaOwner);
 
         // Give Alice authorization to impersonate `id`
-        vm.prank(personaOwner);
+        vm.startPrank(personaOwner);
         _authorizeConsumerSpecific(id, alice, address(consumer));
+        vm.stopPrank();
 
         // Alice impersonates `id`
         vm.startPrank(alice);
         personaMirror.impersonate(id, address(consumer));
+        vm.stopPrank();
 
         // `personaOwner` transfers persona to Bob
         vm.startPrank(personaOwner);
         persona.transferFrom(personaOwner, bob, id);
+        vm.stopPrank();
 
         // Alice should not have an active impersonation
         assertEq(personaMirror.getActivePersona(personaOwner, address(consumer)), 0);
