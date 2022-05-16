@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "release": "release-it",
-    "prepare": "git submodule update --init --recursive",
+    "init:submodules": "git submodule update --init --recursive",
     "// deployment and tasks": "",
     "deploy": "dotenv -- zx src/deployments/deploy.mjs",
     "task:mint:gc": "dotenv -- zx src/tasks/mint/mint-tasks.mjs 100",
