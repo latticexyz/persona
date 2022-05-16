@@ -69,7 +69,7 @@ contract Persona is ERC721, BaseRelayRecipient, EIP2981RoyaltyOverrideCore {
     }
 
     modifier onlyPersonaOwner(uint256 personaId) {
-        require(_msgSender() == ownerOf[personaId], "ONLY_PERSONA_OWNER");
+        require(_msgSender() == _ownerOf[personaId], "ONLY_PERSONA_OWNER");
         _;
     }
 
@@ -173,7 +173,7 @@ contract Persona is ERC721, BaseRelayRecipient, EIP2981RoyaltyOverrideCore {
     }
 
     function approve(address spender, uint256 id) public override {
-        address _owner = ownerOf[id];
+        address _owner = _ownerOf[id];
 
         require(_msgSender() == _owner || isApprovedForAll[_owner][_msgSender()], "NOT_AUTHORIZED");
 
@@ -193,7 +193,7 @@ contract Persona is ERC721, BaseRelayRecipient, EIP2981RoyaltyOverrideCore {
         address to,
         uint256 id
     ) internal {
-        require(from == ownerOf[id], "WRONG_FROM");
+        require(from == _ownerOf[id], "WRONG_FROM");
 
         require(to != address(0), "INVALID_RECIPIENT");
 
@@ -205,12 +205,12 @@ contract Persona is ERC721, BaseRelayRecipient, EIP2981RoyaltyOverrideCore {
         // Underflow of the sender's balance is impossible because we check for
         // ownership above and the recipient's balance can't realistically overflow.
         unchecked {
-            balanceOf[from]--;
+            _balanceOf[from]--;
 
-            balanceOf[to]++;
+            _balanceOf[to]++;
         }
 
-        ownerOf[id] = to;
+        _ownerOf[id] = to;
 
         delete getApproved[id];
 
@@ -264,6 +264,6 @@ contract Persona is ERC721, BaseRelayRecipient, EIP2981RoyaltyOverrideCore {
 
     function tokenURI(uint256 personaId) public view override returns (string memory) {
         require(personaId < currentPersonaId, "TOKEN_DOES_NOT_EXIST");
-        return personaTokenURIGenerator.generateTokenURI(personaId, ownerOf[personaId]);
+        return personaTokenURIGenerator.generateTokenURI(personaId, _ownerOf[personaId]);
     }
 }
