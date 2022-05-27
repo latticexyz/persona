@@ -248,7 +248,7 @@ contract Persona is ERC721, BaseRelayRecipient, EIP2981RoyaltyOverrideCore {
         address from,
         address to,
         uint256 id,
-        bytes memory data
+        bytes calldata data
     ) public override {
         _transferFrom(from, to, id);
 
