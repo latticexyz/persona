@@ -1,0 +1,1 @@
+forge create MockL2Bridge --rpc-url $RPC_URL --private-key $PKEY --force
